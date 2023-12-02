@@ -1,0 +1,57 @@
+version: "3.8"
+
+include:
+  - elk.yaml
+
+services:
+  authDB:
+    image: postgres:15.3
+    container_name: auth_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+      POSTGRES_DB: auth_db
+    ports:
+      - "5431:5432"
+    volumes:
+      - auth_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  cdnDB:
+    image: postgres:15.3
+    container_name: cdn_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cdn
+      POSTGRES_PASSWORD: cdn
+      POSTGRES_DB: cdn_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - cdn_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U films -d films_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.0.11
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  auth_db:
+  cdn_db:
