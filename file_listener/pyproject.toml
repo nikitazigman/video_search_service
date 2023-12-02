@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "file-listener"
+version = "0.1.0"
+description = ""
+authors = ["paveleroshkinweb <eroshkin321@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+watchdog = "^3.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
