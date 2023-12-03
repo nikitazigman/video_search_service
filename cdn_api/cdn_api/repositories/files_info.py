@@ -19,9 +19,6 @@ class FileInfoRepositoryProtocol(Protocol):
     async def insert_batch(self, files: list[InsertFileSchema]) -> None:
         ...
 
-    async def update(self, hash: str) -> FileSchema:
-        ...
-
     async def delete(self, file_id: UUID) -> None:
         ...
 
@@ -48,9 +45,6 @@ class FileInfoRepository:
             [file.model_dump() for file in files]
         )
         await self.session.execute(insert_stmt)
-
-    async def update(self, hash: str) -> FileSchema:
-        ...
 
     async def delete(self, file_id: UUID) -> None:
         ...
