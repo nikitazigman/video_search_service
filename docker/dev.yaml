@@ -35,7 +35,7 @@ services:
     volumes:
       - cdn_db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U films -d films_db"]
+      test: ["CMD-SHELL", "pg_isready -U cdn -d cdn_db"]
       interval: 5s
       timeout: 5s
       retries: 10
