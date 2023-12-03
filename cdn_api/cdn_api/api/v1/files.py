@@ -16,7 +16,6 @@ from cdn_api.utils.dependencies import (
 from cdn_api.utils.user_roles import UserRoles
 
 from fastapi import APIRouter, Depends
-from fastapi_pagination import Page
 
 
 router = APIRouter()
@@ -31,7 +30,7 @@ AdminPermissionType = Annotated[
 
 @router.post(
     path="/upload",
-    response_model=Page[responses.FileSchema],
+    response_model=list[responses.FileSchema],
     summary="Upload a zip archive",
     description="Upload a zipped files to the CDN",
     response_description="An information of the uploaded files",
@@ -42,8 +41,8 @@ async def upload_files(
     # _jwt_claims: AdminPermissionType,
     zip_archive: ZipArchiveBodyType,
     service: UploadServiceType,
-) -> Page[responses.FileSchema]:
-    return service.upload(zip_archive)
+) -> list[responses.FileSchema]:
+    return await service.upload(zip_archive)
 
 
 @router.delete(
@@ -57,4 +56,4 @@ async def delete_file(
     file_id: UUID,
     service: RemoveServiceType,
 ) -> None:
-    service.remove(file_id)
+    await service.remove(file_id)

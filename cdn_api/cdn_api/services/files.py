@@ -1,66 +1,61 @@
-import zipfile
-
-from datetime import datetime
 from pathlib import Path
-from typing import Protocol
-from uuid import UUID, uuid4
+from typing import Annotated, Protocol
+from uuid import UUID
 
 from cdn_api.schemas.requests import UploadZipArchive
 from cdn_api.schemas.responses import FileSchema
+from cdn_api.uow.files import FileUOWProtocol, get_file_uow
+from cdn_api.utils import utils
 
-from fastapi_pagination import Page, Params
+from fastapi import Depends
 
 
 class UploaderProtocol(Protocol):
-    def upload(self, zip_archive_stream: UploadZipArchive) -> Page[FileSchema]:
+    async def upload(
+        self, zip_archive_stream: UploadZipArchive
+    ) -> list[FileSchema]:
         ...
 
 
 class RemoverProtocol(Protocol):
-    def remove(self, file_id: UUID) -> None:
+    async def remove(self, file_id: UUID) -> None:
         ...
 
 
 class FileService:
-    def insert_files_to_sql(
-        self, files: list[zipfile.ZipInfo], path_to_store: Path
-    ) -> Page[FileSchema]:
-        fake_response = [
-            FileSchema(
-                id=uuid4(),
-                name=f"file_{i}.txt",
-                path=f"path/to/file_{i}.txt",
-                version=1,
-                hash_code=str(hash(i)),
-                created_at=datetime.now(),
-                updated_at=datetime.now(),
-            )
-            for i in range(10)
-        ]
+    def __init__(self, uow: FileUOWProtocol) -> None:
+        self.uow = uow
 
-        return Page.create(
-            items=fake_response, params=Params(), total=len(fake_response)
-        )
-
-    def remove(self, file_id: UUID) -> None:
+    async def remove(self, file_id: UUID) -> None:
         return None
 
-    def upload(self, zip_archive_stream: UploadZipArchive) -> Page[FileSchema]:
+    async def upload(
+        self, zip_archive_stream: UploadZipArchive
+    ) -> list[FileSchema]:
         archive = zip_archive_stream.zip_archive.file
         path_to_store = Path(zip_archive_stream.path)
 
-        # uow
-        with zipfile.ZipFile(archive) as zip:
-            info_list = zip.infolist()
-            files_page = self.insert_files_to_sql(info_list, path_to_store)
-            zip.extractall(path_to_store)
+        async with self.uow as uow:
+            async with uow.zip_repo_cls(archive) as zip:
+                info_list = await zip.get_info()
+                insert_data = utils.transform_zip_info_to_insert_file(
+                    info_list, path_to_store
+                )
+                await uow.file_info_repo.insert_batch(insert_data)
+                await zip.extract(path=path_to_store, members=info_list)
+
+                files_page = await uow.file_info_repo.get_all_info()
+                await uow.commit()
 
         return files_page
 
 
-def get_uploader() -> UploaderProtocol:
-    return FileService()
+FileRepositoryType = Annotated[FileUOWProtocol, Depends(get_file_uow)]
 
 
-def get_remover() -> RemoverProtocol:
-    return FileService()
+def get_uploader(uow: FileRepositoryType) -> UploaderProtocol:
+    return FileService(uow)
+
+
+def get_remover(uow: FileRepositoryType) -> RemoverProtocol:
+    return FileService(uow)

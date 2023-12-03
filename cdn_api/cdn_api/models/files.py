@@ -14,9 +14,6 @@ class File(BaseModel, TimeStampedMixin, UUIDMixin):
     name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     path: Mapped[str] = mapped_column(String(512), unique=True, nullable=False)
     version: Mapped[int] = mapped_column(Integer, nullable=False)
-    hash_code: Mapped[str] = mapped_column(
-        String(255), nullable=False, unique=True
-    )
 
     def __repr__(self) -> str:
         return f"<file {self.path}>"
