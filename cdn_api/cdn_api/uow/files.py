@@ -9,6 +9,7 @@ from cdn_api.repositories.files_info import (
     FileInfoRepositoryProtocol,
     get_file_info_repo,
 )
+from cdn_api.utils.dependencies import DBSessionType
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -55,13 +56,11 @@ class FileUOW:
             raise exception
 
     async def commit(self) -> None:
-        ...
-        # await self.sql_session.commit()
+        await self.sql_session.commit()
 
     async def rollback(self) -> None:
-        ...
-        # await self.sql_session.rollback()
+        await self.sql_session.rollback()
 
 
-def get_file_uow(sql_session=None) -> FileUOWProtocol:
+def get_file_uow(sql_session: DBSessionType) -> FileUOWProtocol:
     return FileUOW(sql_session)

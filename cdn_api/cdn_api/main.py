@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from cdn_api.api.v1.files import router as files_router
+from cdn_api.configs.postgres import close_async_engine, init_async_engine
 from cdn_api.configs.settings import get_settings
 
 import uvicorn
@@ -14,7 +15,9 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await init_async_engine(settings)
     yield
+    await close_async_engine()
 
 
 app = FastAPI(
