@@ -36,7 +36,7 @@ def pong() -> dict[str, str]:
     return {"ping": "pong!"}
 
 
-app.include_router(files_router, prefix="/api/v1", tags=["films"])
+app.include_router(files_router, prefix="/api/v1", tags=["files"])
 
 if __name__ == "__main__":
     uvicorn.run(
