@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "cdn_worker"
+version = "0.1.0"
+description = ""
+authors = ["Alena Konovalova <alena.kono@fastmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.11"
+pydantic = {extras = ["dotenv"], version = "^2.5.2"}
+pydantic-settings = "^2.1.0"
+psycopg = "~3.1.14"
+structlog = "^23.2.0"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.1.6"
+mypy = "^1.7.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+ignore_missing_imports = "True"
+strict_optional = "True"
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.ruff]
+exclude = [".git", "docs", "build", "dist", "venv"]
+line-length = 79
+target-version = "py311"
+fixable = ["ALL"]
+select = [
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "UP", # pyupgrade,
+    "I",  # isort
+]
+extend-select = ["I"]
+
+[tool.ruff.isort]
+lines-after-imports = 2
+lines-between-types = 1
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
