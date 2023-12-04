@@ -7,7 +7,11 @@ from cdn_worker.schemas import edge_nodes as edge_node_schemas
 
 class IEdgeNodeRepository(ABC):
     @abstractmethod
-    def get_all(self) -> None:
+    def get_all(self) -> list[edge_node_schemas.EdgeNode]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_available(self) -> list[edge_node_schemas.EdgeNode]:
         raise NotImplementedError
 
 
@@ -19,6 +23,17 @@ class PostgresEdgeNodeRepository(IEdgeNodeRepository):
 
     def get_all(self) -> list[edge_node_schemas.EdgeNode]:
         query = sql.SQL("SELECT * FROM cdn_api.edge_nodes")
+
+        with self.conn.cursor() as curs:
+            curs.execute(query)
+            data = curs.fetchall()
+
+        return [edge_node_schemas.EdgeNode.model_validate(row) for row in data]
+
+    def get_available(self) -> list[edge_node_schemas.EdgeNode]:
+        query = sql.SQL(
+            "SELECT * FROM cdn_api.edge_nodes WHERE status='online'"
+        )
 
         with self.conn.cursor() as curs:
             curs.execute(query)
