@@ -11,6 +11,5 @@ class FileSchema(BaseModel):
     name: str
     path: str
     version: int
-    hash_code: str
     created_at: datetime
     updated_at: datetime
