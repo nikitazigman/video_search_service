@@ -8,9 +8,6 @@ def transform_zip_info_to_insert_file(
     files_info: list[ZipInfo], path: Path
 ) -> list[InsertFileSchema]:
     return [
-        InsertFileSchema(
-            name=zip_info.filename,
-            path=path / zip_info.filename,
-        )
+        InsertFileSchema(path=str(path / zip_info.filename))
         for zip_info in files_info
     ]

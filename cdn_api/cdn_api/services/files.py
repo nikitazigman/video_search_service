@@ -8,12 +8,13 @@ from cdn_api.uow.files import FileUOWProtocol, get_file_uow
 from cdn_api.utils import utils
 
 from fastapi import Depends
+from fastapi_pagination import Page
 
 
 class UploaderProtocol(Protocol):
     async def upload(
         self, zip_archive_stream: UploadZipArchive
-    ) -> list[FileSchema]:
+    ) -> Page[FileSchema]:
         ...
 
 
@@ -31,7 +32,7 @@ class FileService:
 
     async def upload(
         self, zip_archive_stream: UploadZipArchive
-    ) -> list[FileSchema]:
+    ) -> Page[FileSchema]:
         archive = zip_archive_stream.zip_archive.file
         path_to_store = Path(zip_archive_stream.path)
 
