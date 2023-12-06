@@ -2,6 +2,7 @@ from collections.abc import AsyncGenerator
 
 from cdn_api.configs.settings import Settings
 from cdn_api.models.common import BaseModel
+from cdn_api.models.edge_nodes import EdgeNode, Location  # noqa: F401
 
 from sqlalchemy.ext.asyncio import (
     AsyncConnection,
