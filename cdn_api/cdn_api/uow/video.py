@@ -1,22 +1,22 @@
 from types import TracebackType
 from typing import Protocol, Self
 
-from cdn_api.repositories.files import (
-    ZipRepositoryProtocol,
-    get_zip_repository_type,
+from cdn_api.repositories.s3 import S3RepoProtocol, get_s3_repo
+from cdn_api.repositories.tasks import TaskRepositoryProtocol, get_task_repo
+from cdn_api.repositories.video_meta import (
+    VideoMetaRepositoryProtocol,
+    get_video_meta_repo,
 )
-from cdn_api.repositories.files_info import (
-    FileInfoRepositoryProtocol,
-    get_file_info_repo,
-)
-from cdn_api.utils.dependencies import DBSessionType
+from cdn_api.utils.dependencies import DBSessionType, S3ClientType
 
+from miniopy_async import Minio  # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class FileUOWProtocol(Protocol):
-    zip_repo_cls: type[ZipRepositoryProtocol]
-    file_info_repo: FileInfoRepositoryProtocol
+class VideoUOWProtocol(Protocol):
+    s3_repo: S3RepoProtocol
+    video_meta_repo: VideoMetaRepositoryProtocol
+    task_repo: TaskRepositoryProtocol
 
     async def __aenter__(self) -> Self:
         ...
@@ -37,10 +37,12 @@ class FileUOWProtocol(Protocol):
 
 
 class FileUOW:
-    def __init__(self, sql_session: AsyncSession):
+    def __init__(self, sql_session: AsyncSession, s3_client: Minio):
         self.sql_session = sql_session
-        self.zip_repo_cls = get_zip_repository_type()
-        self.file_info_repo = get_file_info_repo(self.sql_session)
+
+        self.video_meta_repo = get_video_meta_repo(self.sql_session)
+        self.task_repo = get_task_repo(self.sql_session)
+        self.s3_repo = get_s3_repo(s3_client)
 
     async def __aenter__(self) -> Self:
         return self
@@ -62,5 +64,7 @@ class FileUOW:
         await self.sql_session.rollback()
 
 
-def get_file_uow(sql_session: DBSessionType) -> FileUOWProtocol:
-    return FileUOW(sql_session)
+def get_file_uow(
+    sql_session: DBSessionType, s3_client: S3ClientType
+) -> VideoUOWProtocol:
+    return FileUOW(sql_session=sql_session, s3_client=s3_client)

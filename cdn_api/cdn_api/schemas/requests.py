@@ -1,11 +1,13 @@
 from fastapi import Form, UploadFile
 
 
-class UploadZipArchive:
+class UploadVideo:
     def __init__(
         self,
-        zip_archive: UploadFile,
-        path: str = Form(),
+        video: UploadFile,
+        name: str = Form(),
+        bucket: str = Form(),
     ):
-        self.zip_archive = zip_archive
-        self.path = path
+        self.video = video
+        self.name = name
+        self.bucket = bucket

@@ -1,6 +1,6 @@
-from cdn_api.models.files import File
+from cdn_api.models.video import VideoMeta
 
 
 __all__ = [
-    "File",
+    "VideoMeta",
 ]

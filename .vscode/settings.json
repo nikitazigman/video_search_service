@@ -1,0 +1,22 @@
+{
+    "ruff.enable": true,
+    "ruff.lint.run": "onSave",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": true,
+            "source.organizeImports.ruff": true
+        }
+    },
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "cSpell.words": [
+        "asyncpg",
+        "filebeat",
+        "fput",
+        "minio",
+        "miniopy",
+        "ondelete"
+    ]
+}
