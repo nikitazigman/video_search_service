@@ -13,6 +13,14 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
     )
+    rabbitmq_host: str
+    rabbitmq_port: int
+    rabbitmq_user: str
+    rabbitmq_password: str
+    rabbitmq_vhost: str
+
+    worker_queue_name: str
+
     minio_endpoint: str
     minio_access_key: str
     minio_secret_key: str
@@ -42,6 +50,12 @@ class Settings(BaseSettings):
 
     rate_limiter_times: int = 10
     rate_limiter_seconds: int = 60
+
+    def rabbitmq_dsn(self) -> str:
+        return (
+            f"amqp://{self.rabbitmq_user}:{self.rabbitmq_password}"
+            f"@{self.rabbitmq_host}:{self.rabbitmq_port}/{self.rabbitmq_vhost}"
+        )
 
     def postgres_dsn(self) -> str:
         return (

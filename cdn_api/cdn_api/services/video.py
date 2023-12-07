@@ -34,6 +34,11 @@ class VideoService:
             task_schema = await uow.task_repo.insert(
                 status=Status.PENDING, video_meta_id=video_schema.id
             )
+            upload_video_response = UploadVideoResponse(
+                task=task_schema, video_meta=video_schema
+            )
+            await uow.message_queue.send_message(upload_video_response)
+
             await uow.s3_repo.upload_video(
                 bucket_name=video_body.bucket,
                 file_name=str(video_schema.id),

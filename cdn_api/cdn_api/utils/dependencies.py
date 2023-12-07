@@ -5,11 +5,13 @@ from typing import Annotated
 
 from cdn_api.configs.minio import get_s3_client
 from cdn_api.configs.postgres import get_db_session
+from cdn_api.configs.rabbitmq import get_rabbitmq_channel
 from cdn_api.configs.redis import get_redis_client
 from cdn_api.configs.settings import get_settings
 from cdn_api.schemas.jwt import JwtClaims
 from cdn_api.utils.authorization import JWTBearer
 
+from aio_pika.abc import AbstractRobustChannel
 from fastapi import Depends, HTTPException
 from fastapi_limiter.depends import RateLimiter  # type: ignore
 from fastapi_pagination import Params
@@ -20,6 +22,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 settings = get_settings()
 
+RabbitMQChannelType = Annotated[
+    AbstractRobustChannel, Depends(get_rabbitmq_channel)
+]
 S3ClientType = Annotated[Minio, Depends(get_s3_client)]
 DBSessionType = Annotated[AsyncSession, Depends(get_db_session)]
 RedisClientType = Annotated[Redis, Depends(get_redis_client)]

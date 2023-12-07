@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from cdn_api.api.v1.video import router as files_router
 from cdn_api.configs.minio import init_s3_client
 from cdn_api.configs.postgres import close_async_engine, init_async_engine
+from cdn_api.configs.rabbitmq import close_rabbitmq, init_rabbitmq
 from cdn_api.configs.settings import get_settings
 
 import uvicorn
@@ -17,8 +18,10 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_async_engine(settings)
+    await init_rabbitmq(settings)
     init_s3_client(settings)
     yield
+    await close_rabbitmq()
     await close_async_engine()
 
 

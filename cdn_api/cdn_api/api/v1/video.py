@@ -39,10 +39,10 @@ AdminPermissionType = Annotated[
 async def upload_video(
     # _: RateLimiterType,
     # _jwt_claims: AdminPermissionType,
-    zip_archive: UploadVideoBodyType,
+    video_file: UploadVideoBodyType,
     service: UploadServiceType,
 ) -> responses.UploadVideoResponse:
-    return await service.upload(zip_archive)
+    return await service.upload(video_file)
 
 
 @router.delete(
