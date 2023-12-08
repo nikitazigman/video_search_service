@@ -14,8 +14,6 @@ class S3RepoProtocol(Protocol):
 
 
 class S3Repo:
-    CHUCK_SIZE_BYTES = 1024 * 1024 * 5  # 5MB
-
     def __init__(self, client: Minio):
         self.client = client
 
