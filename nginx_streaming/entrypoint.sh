@@ -1,7 +1,3 @@
 echo "Starting nginx streaming server"
 
-while true
-do
-    echo "Sleep"
-    sleep 10
-done
+./nginx/objs/nginx -c /etc/nginx/nginx.conf
