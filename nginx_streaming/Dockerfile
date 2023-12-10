@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libpcre3-dev \
     libssl-dev \
     zlib1g-dev \
+    ufw \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -19,7 +20,8 @@ RUN git clone https://github.com/arut/nginx-rtmp-module.git \
     && cd nginx \
     && ./auto/configure --add-module=../nginx-rtmp-module \
     && make \
-    && make install
+    && make install \
+    && ufw allow 1935/tcp
 
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./entrypoint.sh ./entrypoint.sh
