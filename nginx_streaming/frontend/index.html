@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Simple streaming example</title>
+        <link href="https://vjs.zencdn.net/7.2.3/video-js.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-hls/5.14.1/videojs-contrib-hls.js"></script>
+        <script src="https://vjs.zencdn.net/7.2.3/video.js"></script>
+    </head>
+
+    <body>
+        <h1>Streaming video</h1>
+        <video id='dream-video' class="video-js vjs-default-skin" width="400" height="300" controls>
+            <source type="application/x-mpegURL" src="http://127.0.0.1/tv/720_video.m3u8">
+        </video>
+    </body>
+
+    <script>
+        var player = videojs('dream-video');
+        player.play();
+</script>
+
+</html>
