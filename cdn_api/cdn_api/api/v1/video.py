@@ -4,7 +4,7 @@ from uuid import UUID
 
 from cdn_api.schemas import requests, responses
 from cdn_api.schemas.jwt import JwtClaims
-from cdn_api.services.files import (
+from cdn_api.services.video import (
     RemoverProtocol,
     UploaderProtocol,
     get_remover,
@@ -16,12 +16,11 @@ from cdn_api.utils.dependencies import (
 from cdn_api.utils.user_roles import UserRoles
 
 from fastapi import APIRouter, Depends
-from fastapi_pagination import Page
 
 
 router = APIRouter()
 
-ZipArchiveBodyType = Annotated[requests.UploadZipArchive, Depends()]
+UploadVideoBodyType = Annotated[requests.UploadVideo, Depends()]
 UploadServiceType = Annotated[UploaderProtocol, Depends(get_uploader)]
 RemoveServiceType = Annotated[RemoverProtocol, Depends(get_remover)]
 AdminPermissionType = Annotated[
@@ -31,19 +30,19 @@ AdminPermissionType = Annotated[
 
 @router.post(
     path="/upload",
-    response_model=Page[responses.FileSchema],
-    summary="Upload a zip archive",
+    response_model=responses.UploadVideoResponse,
+    summary="Upload a video file",
     description="Upload a zipped files to the CDN",
     response_description="An information of the uploaded files",
     status_code=HTTPStatus.CREATED,
 )
-async def upload_files(
+async def upload_video(
     # _: RateLimiterType,
     # _jwt_claims: AdminPermissionType,
-    zip_archive: ZipArchiveBodyType,
+    video_file: UploadVideoBodyType,
     service: UploadServiceType,
-) -> Page[responses.FileSchema]:
-    return await service.upload(zip_archive)
+) -> responses.UploadVideoResponse:
+    return await service.upload(video_file)
 
 
 @router.delete(

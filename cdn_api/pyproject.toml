@@ -22,6 +22,9 @@ sqlalchemy = {extras = ["asyncio"], version = "^2.0.22"}
 fastapi-filter = "^1.0.0"
 orjson = "^3.9.10"
 asgiref = "^3.7.2"
+minio = "^7.2.0"
+miniopy-async = "^1.17"
+aio-pika = "^9.3.1"
 
 
 [tool.poetry.group.dev.dependencies]
