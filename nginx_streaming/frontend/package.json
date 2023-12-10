@@ -8,5 +8,8 @@
     "start": "http-server"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
 }
