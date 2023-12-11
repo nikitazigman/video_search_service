@@ -7,7 +7,7 @@ from cdn_api.configs.minio import get_s3_client
 from cdn_api.configs.postgres import get_db_session
 from cdn_api.configs.rabbitmq import get_rabbitmq_channel
 from cdn_api.configs.redis import get_redis_client
-from cdn_api.configs.settings import get_settings
+from cdn_api.configs.settings import Settings, get_settings
 from cdn_api.schemas.jwt import JwtClaims
 from cdn_api.utils.authorization import JWTBearer
 
@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 settings = get_settings()
 
+SettingsType = Annotated[Settings, Depends(get_settings)]
 RabbitMQChannelType = Annotated[
     AbstractRobustChannel, Depends(get_rabbitmq_channel)
 ]

@@ -3,7 +3,6 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
@@ -25,9 +24,6 @@ class Settings(BaseSettings):
     minio_access_key: str
     minio_secret_key: str
 
-    original_bucket: str = "original"
-    hlc_bucket: str = "hlc"
-
     postgres_db: str
     postgres_user: str
     postgres_password: str
@@ -35,24 +31,15 @@ class Settings(BaseSettings):
     postgres_port: int
     postgres_schema: str
 
-    redis_host: str
-    redis_port: int
-
-    cache_expire_in_seconds: int
-
     service_name: str
     service_description: str
     service_host: str
     service_port: int
 
+    tmp_folder: Path
+
     debug: bool = False
     logging_level: str = "INFO"
-
-    jwt_encoding_algorithm: str = "HS256"
-    jwt_secret_key: str
-
-    rate_limiter_times: int = 10
-    rate_limiter_seconds: int = 60
 
     def rabbitmq_dsn(self) -> str:
         return (
@@ -66,10 +53,7 @@ class Settings(BaseSettings):
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
 
-    def redis_dsn(self) -> str:
-        return f"redis://{self.redis_host}:{self.redis_port}"
-
 
 @lru_cache(maxsize=1)
-def get_settings():
-    return Settings()
+def get_settings() -> Settings:
+    return Settings()  # type: ignore

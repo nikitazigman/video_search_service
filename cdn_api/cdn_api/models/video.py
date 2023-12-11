@@ -11,10 +11,14 @@ from sqlalchemy.orm import Mapped, mapped_column
 class VideoMeta(BaseModel, TimeStampedMixin, UUIDMixin):
     __tablename__ = "video_meta"
 
-    bucket: Mapped[str] = mapped_column(
-        String(512), unique=True, nullable=False
+    bucket_original: Mapped[str] = mapped_column(
+        String(512), unique=False, nullable=False
     )
     name: Mapped[str] = mapped_column(String(512), unique=True, nullable=False)
 
+    bucket_hlc: Mapped[str] = mapped_column(
+        String(512), unique=True, nullable=False
+    )
+
     def __repr__(self) -> str:
-        return f"Video {self.bucket}/{self.name}"
+        return f"Video {self.bucket_original}/{self.name}"

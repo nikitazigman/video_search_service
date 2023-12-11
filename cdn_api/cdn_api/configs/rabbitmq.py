@@ -18,8 +18,7 @@ async def get_rabbitmq_channel() -> AbstractChannel:
     if _connection is None:
         raise RuntimeError("RabbitMQ is not initialized")
 
-    async with _connection:
-        yield await _connection.channel(publisher_confirms=False)
+    yield await _connection.channel(publisher_confirms=False)
 
 
 async def close_rabbitmq() -> None:

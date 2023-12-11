@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "video-converter"
+version = "0.1.0"
+description = ""
+authors = ["nikita zigman <zigman.nikita@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aio-pika = "^9.3.0"
+pydantic-settings = "^2.0.3"
+loguru = "^0.7.2"
+faststream = {extras = ["rabbit"], version = "^0.2.12"}
+tenacity = "^8.2.3"
+pydantic = "^2.5.2"
+miniopy-async = "^1.17"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.23"}
+asgiref = "^3.7.2"
+asyncpg = "^0.29.0"
+
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.18.1"
+ipykernel = "^6.27.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Annotated
 from uuid import UUID
 
-from cdn_api.schemas import requests, responses
+from cdn_api.schemas import responses
 from cdn_api.schemas.jwt import JwtClaims
 from cdn_api.services.video import (
     RemoverProtocol,
@@ -15,12 +15,11 @@ from cdn_api.utils.dependencies import (
 )
 from cdn_api.utils.user_roles import UserRoles
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile
 
 
 router = APIRouter()
 
-UploadVideoBodyType = Annotated[requests.UploadVideo, Depends()]
 UploadServiceType = Annotated[UploaderProtocol, Depends(get_uploader)]
 RemoveServiceType = Annotated[RemoverProtocol, Depends(get_remover)]
 AdminPermissionType = Annotated[
@@ -39,7 +38,7 @@ AdminPermissionType = Annotated[
 async def upload_video(
     # _: RateLimiterType,
     # _jwt_claims: AdminPermissionType,
-    video_file: UploadVideoBodyType,
+    video_file: UploadFile,
     service: UploadServiceType,
 ) -> responses.UploadVideoResponse:
     return await service.upload(video_file)
