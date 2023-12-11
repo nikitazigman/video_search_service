@@ -19,7 +19,7 @@ class VideoMetaRepositoryProtocol(Protocol):
         ...
 
     async def insert(
-        self, name: str, original_bucket: str, bucket_hlc: str
+        self, name: str, original_bucket: str, bucket_hlc: str, video_id: UUID
     ) -> VideoSchema:
         ...
 
@@ -49,7 +49,7 @@ class VideoMetaRepository:
         return files_info
 
     async def insert(
-        self, name: str, original_bucket: str, bucket_hlc: str
+        self, name: str, original_bucket: str, bucket_hlc: str, video_id: UUID
     ) -> VideoSchema:
         insert_stmt = (
             insert(VideoMeta)
@@ -57,6 +57,7 @@ class VideoMetaRepository:
                 name=name,
                 bucket_original=original_bucket,
                 bucket_hlc=bucket_hlc,
+                video_id=video_id,
             )
             .returning(VideoMeta)
         )

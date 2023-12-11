@@ -3,15 +3,18 @@ from typing import Annotated, Protocol
 from uuid import UUID
 
 from cdn_api.models.task import Status
+from cdn_api.schemas.requests import VideoUploadRequest
 from cdn_api.schemas.responses import UploadVideoResponse
 from cdn_api.uow.video import VideoUOWProtocol, get_file_uow
 from cdn_api.utils.dependencies import SettingsType
 
-from fastapi import Depends, UploadFile
+from fastapi import Depends
 
 
 class UploaderProtocol(Protocol):
-    async def upload(self, video_body: UploadFile) -> UploadVideoResponse:
+    async def upload(
+        self, video_body: VideoUploadRequest
+    ) -> UploadVideoResponse:
         ...
 
 
@@ -31,8 +34,10 @@ class VideoService:
     async def remove(self, video_id: UUID) -> None:
         return None
 
-    async def upload(self, video_body: UploadFile) -> UploadVideoResponse:
-        filename = video_body.filename or f"unknown_{datetime.now()}.mp4"
+    async def upload(
+        self, video_body: VideoUploadRequest
+    ) -> UploadVideoResponse:
+        filename = video_body.file.filename or f"unknown_{datetime.now()}.mp4"
         original_bucket = self.original_bucket
 
         async with self.uow as uow:
@@ -40,6 +45,7 @@ class VideoService:
                 name=filename,
                 original_bucket=self.original_bucket,
                 bucket_hlc=self.hlc_bucket,
+                video_id=video_body.video_id,
             )
             task_schema = await uow.task_repo.insert(
                 status=Status.PENDING, video_meta_id=video_schema.id
@@ -52,7 +58,7 @@ class VideoService:
             await uow.s3_repo.upload_video(
                 bucket_name=original_bucket,
                 file_name=filename,
-                file=video_body,
+                file=video_body.file,
             )
             await uow.commit()
 

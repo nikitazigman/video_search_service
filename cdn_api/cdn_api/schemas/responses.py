@@ -12,6 +12,7 @@ class VideoSchema(BaseModel):
     name: str
     bucket_original: str
     bucket_hlc: str
+    video_id: UUID
 
     created_at: datetime
     updated_at: datetime

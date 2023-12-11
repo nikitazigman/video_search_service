@@ -5,6 +5,7 @@ from cdn_api.models.common import (
 )
 
 from sqlalchemy import String
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -14,6 +15,7 @@ class VideoMeta(BaseModel, TimeStampedMixin, UUIDMixin):
     bucket_original: Mapped[str] = mapped_column(
         String(512), unique=False, nullable=False
     )
+    video_id: Mapped[UUID] = mapped_column(UUID, unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(512), unique=True, nullable=False)
 
     bucket_hlc: Mapped[str] = mapped_column(
