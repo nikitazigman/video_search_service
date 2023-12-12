@@ -12,6 +12,7 @@ _conn: psycopg.AsyncConnection | None = None
 async def init_db_connection(settings: AppSettings) -> None:
     _conn = await psycopg.AsyncConnection.connect(
         conninfo=settings.postgres.dsn,
+        autocommit=False,
         row_factory=psycopg.rows.dict_row,
     )
 
