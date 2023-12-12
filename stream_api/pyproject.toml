@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "stream_api"
+version = "0.1.0"
+description = ""
+authors = ["Alena Konovalova <alena.kono@fastmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.11"
+fastapi = "^0.105.0"
+uvicorn = "^0.24.0.post1"
+pydantic-settings = "^2.1.0"
+structlog = "^23.2.0"
+psycopg = "^3.1.14"
+miniopy-async = "^1.17"
+orjson = "^3.9.10"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.1.7"
+mypy = "^1.7.1"
+
+[tool.ruff]
+exclude = [".git", "docs", "build", "dist", "venv"]
+line-length = 88
+target-version = "py311"
+select = ["ALL"]
+ignore = ["D", "ANN", "TRY", "EM", "COM812", "ISC001"]
+fixable = ["ALL"]
+
+[tool.ruff.isort]
+lines-after-imports = 2
+lines-between-types = 1
+known-first-party = ["stream_api"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+
+[tool.mypy]
+ignore_missing_imports = "True"
+strict_optional = "True"
+plugins = ["pydantic.mypy"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
