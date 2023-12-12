@@ -20,7 +20,9 @@ from fastapi import APIRouter, Depends
 
 router = APIRouter()
 
-UploadVideoBodyType = Annotated[requests.UploadVideo, Depends()]
+VideoFileRequestType = Annotated[
+    requests.VideoUploadRequest, Depends(requests.VideoUploadRequest)
+]
 UploadServiceType = Annotated[UploaderProtocol, Depends(get_uploader)]
 RemoveServiceType = Annotated[RemoverProtocol, Depends(get_remover)]
 AdminPermissionType = Annotated[
@@ -39,7 +41,7 @@ AdminPermissionType = Annotated[
 async def upload_video(
     # _: RateLimiterType,
     # _jwt_claims: AdminPermissionType,
-    video_file: UploadVideoBodyType,
+    video_file: VideoFileRequestType,
     service: UploadServiceType,
 ) -> responses.UploadVideoResponse:
     return await service.upload(video_file)

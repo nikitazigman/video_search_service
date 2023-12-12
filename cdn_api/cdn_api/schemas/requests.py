@@ -1,13 +1,9 @@
-from fastapi import Form, UploadFile
+from uuid import UUID
+
+from fastapi import UploadFile
 
 
-class UploadVideo:
-    def __init__(
-        self,
-        video: UploadFile,
-        name: str = Form(),
-        bucket: str = Form(),
-    ):
-        self.video = video
-        self.name = name
-        self.bucket = bucket
+class VideoUploadRequest:
+    def __init__(self, file: UploadFile, video_id: UUID) -> None:
+        self.file = file
+        self.video_id = video_id
