@@ -18,16 +18,17 @@ class TestVideoMetaPostgresRepository:
     async def test_get_by_id_expected_exists(
         self, db_connection: psycopg.AsyncConnection
     ) -> None:
+        id_ = uuid.uuid4()
         expected_schema = schemas.VideoMeta(
-            id=uuid.UUID("c1efb7fe-d8a1-45ee-b939-e7c4df8cd666"),
             name="test.mp4",
             bucket_original="original",
             bucket_hlc="processed",
+            video_id=uuid.UUID("c1efb7fe-d8a1-45ee-b939-e7c4df8cd666"),
         )
 
         # Arrange
         query = psycopg.sql.SQL(
-            "INSERT INTO {schema}.{table}({fields}) VALUES (%s, %s, %s, %s, %s, %s)"
+            "INSERT INTO {schema}.{table}({fields}) VALUES (%s, %s, %s, %s, %s, %s, %s)"
         ).format(
             fields=psycopg.sql.SQL(",").join(
                 [
@@ -35,6 +36,7 @@ class TestVideoMetaPostgresRepository:
                     psycopg.sql.Identifier("name"),
                     psycopg.sql.Identifier("bucket_original"),
                     psycopg.sql.Identifier("bucket_hlc"),
+                    psycopg.sql.Identifier("video_id"),
                     psycopg.sql.Identifier("created_at"),
                     psycopg.sql.Identifier("updated_at"),
                 ]
@@ -42,24 +44,26 @@ class TestVideoMetaPostgresRepository:
             schema=psycopg.sql.Identifier("cdn_api"),
             table=psycopg.sql.Identifier("video_meta"),
         )
-        id_ = uuid.UUID("c1efb7fe-d8a1-45ee-b939-e7c4df8cd666")
         now = datetime.datetime.now(tz=datetime.UTC)
 
         async with db_connection.cursor() as curs:
             await curs.execute(
                 query,
                 params=[
-                    expected_schema.id,
+                    id_,
                     expected_schema.name,
                     expected_schema.bucket_original,
                     expected_schema.bucket_hlc,
+                    expected_schema.video_id,
                     now,
                     now,
                 ],
             )
 
         # Act
-        video_meta = await self.repo_cls(db_connection).get_by_id(video_id=id_)
+        video_meta = await self.repo_cls(db_connection).get_by_id(
+            video_id=expected_schema.video_id
+        )
 
         # Assert
         assert video_meta == expected_schema
