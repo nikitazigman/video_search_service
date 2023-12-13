@@ -21,12 +21,12 @@ logger = structlog.get_logger()
 
 @asynccontextmanager
 async def lifespan(app: fastapi.FastAPI) -> tp.AsyncGenerator[None, None]:  # noqa: ARG001
-    await databases.init_db_connection(settings=settings)
+    await databases.open_db_connection_pool(settings=settings)
     await s3.init_s3_client(settings=settings)
 
     yield
 
-    await databases.close_db_connection()
+    await databases.close_db_connection_pool()
 
 
 app = fastapi.FastAPI(

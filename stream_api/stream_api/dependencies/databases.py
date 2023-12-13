@@ -2,32 +2,32 @@ import typing as tp
 
 import psycopg
 import psycopg.rows
+import psycopg_pool
 
 from stream_api.settings.app import AppSettings
 
 
-_conn: psycopg.AsyncConnection | None = None
+_conn_pool: psycopg_pool.AsyncConnectionPool | None = None
 
 
-async def init_db_connection(settings: AppSettings) -> None:
-    _conn = await psycopg.AsyncConnection.connect(
+async def open_db_connection_pool(settings: AppSettings) -> None:
+    global _conn_pool  # noqa: PLW0603
+
+    _conn_pool = psycopg_pool.AsyncConnectionPool(
         conninfo=settings.postgres.dsn,
-        autocommit=False,
-        row_factory=psycopg.rows.dict_row,
+        kwargs={"autocommit": False, "row_factory": psycopg.rows.dict_row},
     )
+    await _conn_pool.open()
 
 
-async def close_db_connection() -> None:
-    if _conn is None:
-        raise RuntimeError("DB connection has not been defined.")
-
-    if not _conn.closed:
-        await _conn.close()
+async def close_db_connection_pool() -> None:
+    if _conn_pool is not None and not _conn_pool.closed:
+        await _conn_pool.close()
 
 
 async def get_db_connection() -> tp.AsyncGenerator[psycopg.AsyncConnection, None]:
-    if _conn is None:
-        raise RuntimeError("DB connection has not been defined.")
+    if _conn_pool is None:
+        raise RuntimeError("DB connection pool has not been defined.")
 
-    async with _conn:
-        yield _conn
+    async with _conn_pool.connection() as conn:
+        yield conn

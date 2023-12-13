@@ -29,6 +29,8 @@ class VideoMetaPostgresRepository:
 
 
 async def get_video_meta_repo(
-    connection: psycopg.AsyncConnection,
+    connection: tp.Annotated[
+        psycopg.AsyncConnection, fastapi.Depends(databases.get_db_connection)
+    ],
 ) -> VideoMetaRepositoryProtocol:
     return VideoMetaPostgresRepository(connection=connection)

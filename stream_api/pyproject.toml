@@ -11,7 +11,7 @@ fastapi = "^0.105.0"
 uvicorn = "^0.24.0.post1"
 pydantic-settings = "^2.1.0"
 structlog = "^23.2.0"
-psycopg = "^3.1.14"
+psycopg = {extras = ["pool"], version = "^3.1.14"}
 miniopy-async = "^1.17"
 orjson = "^3.9.10"
 
