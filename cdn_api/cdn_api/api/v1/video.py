@@ -1,3 +1,5 @@
+import logging
+
 from http import HTTPStatus
 from typing import Annotated
 from uuid import UUID
@@ -14,8 +16,12 @@ from cdn_api.utils.dependencies import (
     check_permission,
 )
 from cdn_api.utils.user_roles import UserRoles
+from cdn_api.exceptions import CDNClientException, CDNServerException
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter()
@@ -44,7 +50,15 @@ async def upload_video(
     video_file: VideoFileRequestType,
     service: UploadServiceType,
 ) -> responses.UploadVideoResponse:
-    return await service.upload(video_file)
+    try:
+        return await service.upload(video_file)
+    except CDNClientException as e:
+        logger.exception(f"Client error: {e}")
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail={'error': str(e)})
+    except CDNServerException as e:
+        logger.exception(f"Server error: {e}")
+        # Don't send any details in order to not compromise server implementation details / technologies
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 @router.delete(

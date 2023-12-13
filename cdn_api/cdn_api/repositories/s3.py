@@ -2,6 +2,9 @@ from typing import Protocol
 
 from fastapi import UploadFile
 from miniopy_async import Minio  # type: ignore
+from miniopy_async.error import S3Error, ServerError
+
+from cdn_api.exceptions import VideoUploadS3ServerException
 
 
 class S3RepoProtocol(Protocol):
@@ -48,14 +51,18 @@ class S3Repo:
     async def upload_video(
         self, bucket_name: str, file_name: str, file: UploadFile
     ) -> None:
-        await self.create_bucket(bucket_name)
+        try:
+            await self.create_bucket(bucket_name)
 
-        await self.client.put_object(
-            bucket_name=bucket_name,
-            object_name=file_name,
-            data=file.file,
-            length=file.size,
-        )
+            await self.client.put_object(
+                bucket_name=bucket_name,
+                object_name=file_name,
+                data=file.file,
+                length=file.size,
+            )
+
+        except (S3Error, ServerError, IOError) as e:
+            raise VideoUploadS3ServerException from e
 
 
 def get_s3_repo(s3_client: Minio) -> S3RepoProtocol:

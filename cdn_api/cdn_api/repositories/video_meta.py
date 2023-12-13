@@ -4,11 +4,14 @@ from uuid import UUID
 
 from cdn_api.models.video import VideoMeta
 from cdn_api.schemas.responses import VideoSchema
+from cdn_api.exceptions import DBClientException, DBServerException
 
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError, ArgumentError, SQLAlchemyError
+from pydantic import ValidationError
 
 
 class VideoMetaRepositoryProtocol(Protocol):
@@ -51,18 +54,24 @@ class VideoMetaRepository:
     async def insert(
         self, name: str, original_bucket: str, bucket_hlc: str, video_id: UUID
     ) -> VideoSchema:
-        insert_stmt = (
-            insert(VideoMeta)
-            .values(
-                name=name,
-                bucket_original=original_bucket,
-                bucket_hlc=bucket_hlc,
-                video_id=video_id,
+        try:
+            insert_stmt = (
+                insert(VideoMeta)
+                .values(
+                    name=name,
+                    bucket_original=original_bucket,
+                    bucket_hlc=bucket_hlc,
+                    video_id=video_id,
+                )
+                .returning(VideoMeta)
             )
-            .returning(VideoMeta)
-        )
-        video_meta_model = await self.session.scalar(insert_stmt)
-        return VideoSchema.model_validate(video_meta_model)
+            video_meta_model = await self.session.scalar(insert_stmt)
+            return VideoSchema.model_validate(video_meta_model)
+        except (IntegrityError, ValidationError, ArgumentError) as e:
+            raise DBClientException("Incorrect data was provided!") from e
+        # Any other sql alchemy or network errors should be considered as server failure
+        except (SQLAlchemyError, IOError) as e:
+            raise DBServerException from e
 
     async def delete(self, video_id: UUID) -> None:
         delete_stmt = delete(VideoMeta).where(VideoMeta.id == video_id)

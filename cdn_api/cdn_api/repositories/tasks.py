@@ -4,11 +4,14 @@ from uuid import UUID
 
 from cdn_api.models.task import Status, Task
 from cdn_api.schemas.responses import TaskSchema
+from cdn_api.exceptions import DBClientException, DBServerException
 
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError, ArgumentError, SQLAlchemyError
+from pydantic import ValidationError
 
 
 class TaskRepositoryProtocol(Protocol):
@@ -47,13 +50,19 @@ class TaskRepository:
         return files_info
 
     async def insert(self, status: Status, video_meta_id: UUID) -> TaskSchema:
-        insert_stmt = (
-            insert(Task)
-            .values(status=status, video_meta_id=video_meta_id)
-            .returning(Task)
-        )
-        video_meta_model = await self.session.scalar(insert_stmt)
-        return TaskSchema.model_validate(video_meta_model)
+        try:
+            insert_stmt = (
+                insert(Task)
+                .values(status=status, video_meta_id=video_meta_id)
+                .returning(Task)
+            )
+            video_meta_model = await self.session.scalar(insert_stmt)
+            return TaskSchema.model_validate(video_meta_model)
+        except (IntegrityError, ValidationError, ArgumentError) as e:
+            raise DBClientException("Incorrect data was provided!") from e
+        # Any other sql alchemy or network errors should be considered as server failure
+        except (SQLAlchemyError, IOError) as e:
+            raise DBServerException from e
 
     async def delete(self, task_id: UUID) -> None:
         delete_stmt = delete(Task).where(Task.id == task_id)
