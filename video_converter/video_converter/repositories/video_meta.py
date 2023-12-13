@@ -3,9 +3,11 @@ from uuid import UUID
 
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import SQLAlchemyError
 
 from video_converter.models.video import VideoMeta
 from video_converter.schemas.video import VideoSchema
+from video_converter.exceptions import VideoConverterDBError
 
 
 class VideoMetaRepositoryProtocol(Protocol):
@@ -28,14 +30,17 @@ class VideoMetaRepository:
         name: str,
         bucket: str,
     ) -> VideoSchema:
-        update_stmt = (
-            update(VideoMeta)
-            .where(VideoMeta.id == video_id)
-            .values(name=name, bucket=bucket)
-            .returning(VideoMeta),
-        )
-        video_model = await self.session.scalar(update_stmt)
-        return VideoSchema.model_validate(video_model)
+        try:
+            update_stmt = (
+                update(VideoMeta)
+                .where(VideoMeta.id == video_id)
+                .values(name=name, bucket=bucket)
+                .returning(VideoMeta),
+            )
+            video_model = await self.session.scalar(update_stmt)
+            return VideoSchema.model_validate(video_model)
+        except (SQLAlchemyError, IOError) as e:
+            raise VideoConverterDBError from e
 
 
 def get_video_meta_repo(session: AsyncSession) -> VideoMetaRepositoryProtocol:
