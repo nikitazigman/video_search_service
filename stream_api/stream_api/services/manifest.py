@@ -85,7 +85,7 @@ class VideoManifestFileService:
             s3_video_obj_path = S3VideoObjectPath.from_name_and_resolution(
                 video_name=video_meta.name, video_resolution=video_resolution
             )
-            filename_url_map = await self._get_s3_urls(
+            filename_s3url_map = await self._get_s3_urls(
                 bucket_name=video_meta.bucket_hlc,
                 dir_name=s3_video_obj_path.dir_path,
             )
@@ -96,17 +96,19 @@ class VideoManifestFileService:
                 object_name_stemmed=s3_video_obj_path.object_name_stemmed,
                 extension="m3u8",
             )
-            tmp_filepath = pathlib.Path(self.tmp_dir) / s3_manifest_obj_path.name
+            tmp_manifest_filepath = (
+                pathlib.Path(self.tmp_dir) / s3_manifest_obj_path.name
+            )
 
-            fp_original = await self.s3_repo.download_file(
+            original_manifest_filepath = await self.s3_repo.download_file(
                 bucket_name=video_meta.bucket_hlc,
                 object_name=s3_manifest_obj_path.full_path,
-                target_filepath=tmp_filepath,
+                target_filepath=tmp_manifest_filepath,
             )
             return await self._create_video_manifest_file(
-                src_filepath=fp_original,
-                target_filepath=tmp_filepath,
-                replace_map=filename_url_map,
+                src_filepath=original_manifest_filepath,
+                target_filepath=tmp_manifest_filepath,
+                replace_map=filename_s3url_map,
             )
 
         await logger.error("Video is not found", id=video_id)
@@ -114,6 +116,17 @@ class VideoManifestFileService:
         raise VideoNotFoundHTTPError
 
     async def _get_s3_urls(self, bucket_name: str, dir_name: str) -> dict[str, str]:
+        """Get presigned s3 URLs for each object at the given bucket dir.
+
+        Arg:
+            bucket_name: Name of an S3 bucket.
+            dir_name: S3 path within the S3 bucket.
+
+        Returns:
+            dict[str, str]: Dictionary (key is s3 object relative filename,
+            value is a presigned s3 url).
+        """
+
         await logger.debug(
             "Get presigned s3 urls for objects in the bucket dir",
             bucket_name=bucket_name,

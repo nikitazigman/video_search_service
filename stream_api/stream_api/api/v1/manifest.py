@@ -32,7 +32,7 @@ async def get_video_manifest_file(
     manifest_service: tp.Annotated[
         VideoManifestFileServiceProtocol, fastapi.Depends(get_video_manifest_service)
     ],
-    video_resolution: request_deps.Resolution = request_deps.Resolution.p360,
+    video_resolution: request_deps.VideoResolution = request_deps.VideoResolution.p360,
 ) -> fastapi.responses.FileResponse:
     await logger.debug(
         "Request is received", video_id=video_id, video_resolution=video_resolution
