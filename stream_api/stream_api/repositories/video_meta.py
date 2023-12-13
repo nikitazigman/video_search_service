@@ -20,7 +20,7 @@ class VideoMetaPostgresRepository:
 
     async def get_by_id(self, video_id: uuid.UUID) -> schemas.VideoMeta | None:
         query = psycopg.sql.SQL(
-            "SELECT id, name, bucket_original, bucket_hlc "
+            "SELECT name, bucket_original, bucket_hlc, video_id "
             "FROM cdn_api.video_meta WHERE video_id = %s"
         )
         async with self.conn.cursor() as curs:
