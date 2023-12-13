@@ -1,3 +1,4 @@
+import datetime
 import pathlib
 import typing as tp
 
@@ -23,6 +24,7 @@ class S3RepositoryProtocol(tp.Protocol):
         self,
         bucket_name: str,
         s3_object: miniopy_async.datatypes.Object,
+        expires_in_secs: int,
         method: str,
     ) -> str:
         ...
@@ -51,10 +53,14 @@ class S3MinioRepository:
         self,
         bucket_name: str,
         s3_object: miniopy_async.datatypes.Object,
+        expires_in_secs: int,
         method: str = "GET",
     ) -> str:
         return await self.client.get_presigned_url(
-            method=method, bucket_name=bucket_name, object_name=s3_object.object_name
+            method=method,
+            bucket_name=bucket_name,
+            object_name=s3_object.object_name,
+            expires=datetime.timedelta(seconds=expires_in_secs),
         )
 
     async def download_file(

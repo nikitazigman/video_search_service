@@ -13,3 +13,5 @@ class ServiceSettings(BaseAppSettings):
     host: str
     port: int
     debug: bool = False
+
+    s3_url_expire_in_secs: int = 60 * 60 * 24 * 1  # 1 day

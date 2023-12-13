@@ -54,7 +54,7 @@ class S3VideoObjectPath:
 
 class VideoManifestFileServiceProtocol(tp.Protocol):
     async def generate_video_manifest_file(
-        self, video_id: uuid.UUID, video_resolution: int
+        self, video_id: uuid.UUID, video_resolution: int, s3_urls_expire_in_secs: int
     ) -> pathlib.Path:
         ...
 
@@ -73,7 +73,10 @@ class VideoManifestFileService:
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
 
     async def generate_video_manifest_file(
-        self, video_id: uuid.UUID, video_resolution: int
+        self,
+        video_id: uuid.UUID,
+        video_resolution: int,
+        s3_urls_expire_in_secs: int,
     ) -> pathlib.Path:
         await logger.debug(
             "Get video meta info from DB",
@@ -88,6 +91,7 @@ class VideoManifestFileService:
             filename_s3url_map = await self._get_s3_urls(
                 bucket_name=video_meta.bucket_hlc,
                 dir_name=s3_video_obj_path.dir_path,
+                expire_in_secs=s3_urls_expire_in_secs,
             )
 
             s3_manifest_obj_path = S3VideoObjectPath(
@@ -115,7 +119,9 @@ class VideoManifestFileService:
 
         raise VideoNotFoundHTTPError
 
-    async def _get_s3_urls(self, bucket_name: str, dir_name: str) -> dict[str, str]:
+    async def _get_s3_urls(
+        self, bucket_name: str, dir_name: str, expire_in_secs: int
+    ) -> dict[str, str]:
         """Get presigned s3 URLs for each object at the given bucket dir.
 
         Arg:
@@ -150,6 +156,7 @@ class VideoManifestFileService:
             url = await self.s3_repo.get_presigned_url(
                 bucket_name=bucket_name,
                 s3_object=obj,
+                expires_in_secs=expire_in_secs,
                 method="GET",
             )
             filename = obj.object_name.split("/")[-1]
