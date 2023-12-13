@@ -14,10 +14,12 @@ structlog = "^23.2.0"
 psycopg = {extras = ["pool"], version = "^3.1.14"}
 miniopy-async = "^1.17"
 orjson = "^3.9.10"
+aiofiles = "^23.2.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.7"
 mypy = "^1.7.1"
+types-aiofiles = "^23.2.0.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"

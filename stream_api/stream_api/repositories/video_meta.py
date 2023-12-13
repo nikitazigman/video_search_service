@@ -1,10 +1,12 @@
 import typing as tp
 import uuid
 
+import fastapi
 import psycopg
 import psycopg.sql
 
 from stream_api import schemas
+from stream_api.dependencies import databases
 
 
 class VideoMetaRepositoryProtocol(tp.Protocol):
@@ -19,7 +21,7 @@ class VideoMetaPostgresRepository:
     async def get_by_id(self, video_id: uuid.UUID) -> schemas.VideoMeta | None:
         query = psycopg.sql.SQL(
             "SELECT id, name, bucket_original, bucket_hlc "
-            "FROM cdn_api.video_meta WHERE id = %s"
+            "FROM cdn_api.video_meta WHERE video_id = %s"
         )
         async with self.conn.cursor() as curs:
             await curs.execute(query=query, params=[str(video_id)])
