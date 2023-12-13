@@ -3,7 +3,7 @@ import fastapi.exceptions
 from starlette import status
 
 
-class BaseServiceError(Exception):
+class ServiceError(Exception):
     ...
 
 

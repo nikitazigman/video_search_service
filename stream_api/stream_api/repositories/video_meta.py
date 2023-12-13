@@ -7,6 +7,7 @@ import psycopg.sql
 
 from stream_api import schemas
 from stream_api.dependencies import databases
+from stream_api.repositories.exceptions import PostgresRepositoryError
 
 
 class VideoMetaRepositoryProtocol(tp.Protocol):
@@ -23,9 +24,13 @@ class VideoMetaPostgresRepository:
             "SELECT name, bucket_original, bucket_hlc, video_id "
             "FROM cdn_api.video_meta WHERE video_id = %s"
         )
-        async with self.conn.cursor() as curs:
-            await curs.execute(query=query, params=[str(video_id)])
-            result = await curs.fetchone()
+        try:
+            async with self.conn.cursor() as curs:
+                await curs.execute(query=query, params=[str(video_id)])
+                result = await curs.fetchone()
+
+        except (OSError, psycopg.errors.DatabaseError) as err:
+            raise PostgresRepositoryError from err
 
         return schemas.VideoMeta(**result) if result else None
 
