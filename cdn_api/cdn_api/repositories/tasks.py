@@ -33,9 +33,12 @@ class TaskRepository:
         self.session = session
 
     async def get_by_id(self, task_id: UUID) -> TaskSchema:
-        select_stmt = select(Task).where(Task.id == task_id)
-        task_model = await self.session.scalar(select_stmt)
-        return TaskSchema.model_validate(task_model)
+        try:
+            select_stmt = select(Task).where(Task.id == task_id)
+            task_model = await self.session.scalar(select_stmt)
+            return TaskSchema.model_validate(task_model)
+        except (SQLAlchemyError, IOError) as e:
+            raise DBServerException from e
 
     def _transformer(self, models: Sequence[Task]) -> list[TaskSchema]:
         return [TaskSchema.model_validate(model) for model in models]
