@@ -24,7 +24,6 @@ types-aiofiles = "^23.2.0.0"
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"
 pytest-asyncio = "^0.23.2"
-httpx = "^0.25.2"
 
 [tool.ruff]
 exclude = [".git", "docs", "build", "dist", "venv"]

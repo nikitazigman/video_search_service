@@ -1,6 +1,5 @@
 import typing as tp
 
-import httpx
 import psycopg
 import psycopg.rows
 import psycopg.sql
@@ -37,9 +36,3 @@ async def db_connection() -> tp.AsyncGenerator[psycopg.AsyncConnection, None]:
 
     if not _conn.closed:
         await _conn.close()
-
-
-@pytest_asyncio.fixture(scope="function")
-async def http_client():
-    async with httpx.AsyncClient(app=app, base_url="http://test") as client:
-        yield client
