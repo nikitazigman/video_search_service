@@ -7,6 +7,7 @@ import fastapi.responses
 import structlog
 import uvicorn
 
+from stream_api.api.v1.manifest import router as hls_manifest_router
 from stream_api.dependencies import databases, s3
 from stream_api.settings.app import get_app_settings
 from stream_api.settings.logging import configure_logger
@@ -39,6 +40,8 @@ app = fastapi.FastAPI(
     debug=settings.service.debug,
     default_response_class=fastapi.responses.ORJSONResponse,
 )
+
+app.include_router(hls_manifest_router, prefix="/api/v1", tags=["hls"])
 
 
 @app.get("/ping")
