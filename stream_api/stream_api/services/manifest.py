@@ -4,6 +4,7 @@ import typing as tp
 import uuid
 
 import fastapi
+import structlog
 
 from stream_api import repositories as repos
 from stream_api.services.exceptions import (
@@ -11,6 +12,9 @@ from stream_api.services.exceptions import (
     VideoNotFoundHTTPError,
 )
 from stream_api.utils.files import read_file, write_file
+
+
+logger = structlog.get_logger()
 
 
 @dataclasses.dataclass
@@ -71,6 +75,12 @@ class VideoManifestFileService:
     async def generate_video_manifest_file(
         self, video_id: uuid.UUID, video_resolution: int
     ) -> pathlib.Path:
+        await logger.debug(
+            "Get video meta info from DB",
+            video_id=video_id,
+            video_resolution=video_resolution,
+        )
+
         if video_meta := await self.video_meta_repo.get_by_id(video_id=video_id):
             s3_video_obj_path = S3VideoObjectPath.from_name_and_resolution(
                 video_name=video_meta.name, video_resolution=video_resolution
@@ -87,6 +97,7 @@ class VideoManifestFileService:
                 extension="m3u8",
             )
             tmp_filepath = pathlib.Path(self.tmp_dir) / s3_manifest_obj_path.name
+
             fp_original = await self.s3_repo.download_file(
                 bucket_name=video_meta.bucket_hlc,
                 object_name=s3_manifest_obj_path.full_path,
@@ -98,13 +109,27 @@ class VideoManifestFileService:
                 replace_map=filename_url_map,
             )
 
+        await logger.error("Video is not found", id=video_id)
+
         raise VideoNotFoundHTTPError
 
     async def _get_s3_urls(self, bucket_name: str, dir_name: str) -> dict[str, str]:
+        await logger.debug(
+            "Get presigned s3 urls for objects in the bucket dir",
+            bucket_name=bucket_name,
+            dir_name=dir_name,
+        )
+
         s3_objs = await self.s3_repo.list_objects(
             bucket_name=bucket_name, dir_name=dir_name
         )
         if not s3_objs:
+            await logger.error(
+                "S3 objects are not found in the bucket dir",
+                bucket_name=bucket_name,
+                dir_name=dir_name,
+            )
+
             raise S3ObjectNotFoundHTTPError
 
         filename_url_map = {}
@@ -125,6 +150,8 @@ class VideoManifestFileService:
         target_filepath: pathlib.Path,
         replace_map: dict,
     ) -> pathlib.Path:
+        await logger.debug("Create new video manifest file")
+
         content = await read_file(filepath=src_filepath)
         for k, v in replace_map.items():
             content = content.replace(k, v)

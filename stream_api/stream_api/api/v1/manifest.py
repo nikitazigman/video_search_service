@@ -4,6 +4,7 @@ import uuid
 import fastapi
 import fastapi.responses
 import starlette.background
+import structlog
 
 from starlette import status
 
@@ -14,6 +15,8 @@ from stream_api.services.manifest import (
 )
 from stream_api.utils.files import remove_file
 
+
+logger = structlog.get_logger()
 
 router = fastapi.APIRouter()
 
@@ -31,6 +34,10 @@ async def get_video_manifest_file(
     ],
     video_resolution: request_deps.Resolution = request_deps.Resolution.p360,
 ) -> fastapi.responses.FileResponse:
+    await logger.debug(
+        "Request is received", video_id=video_id, video_resolution=video_resolution
+    )
+
     fp = await manifest_service.generate_video_manifest_file(
         video_id=video_id, video_resolution=video_resolution
     )

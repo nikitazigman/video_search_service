@@ -4,9 +4,13 @@ import typing as tp
 import fastapi
 import miniopy_async
 import miniopy_async.datatypes
+import structlog
 
 from stream_api.dependencies import s3
 from stream_api.repositories.exceptions import S3BucketDoesNotExistError
+
+
+logger = structlog.get_logger()
 
 
 class S3RepositoryProtocol(tp.Protocol):
@@ -59,6 +63,12 @@ class S3MinioRepository:
         object_name: str,
         target_filepath: pathlib.Path,
     ) -> pathlib.Path:
+        await logger.debug(
+            "Download file from s3 to the target filepath",
+            bucket_name=bucket_name,
+            object_name=object_name,
+            target_filepath=target_filepath,
+        )
         await self.client.fget_object(
             bucket_name=bucket_name,
             object_name=object_name,
