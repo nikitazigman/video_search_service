@@ -34,7 +34,7 @@ async def test_get_user_by_id(db_session: AsyncSession, client: AsyncClient) -> 
     await db_session.commit()
 
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -86,7 +86,7 @@ async def test_get_user_history(db_session: AsyncSession, client: AsyncClient) -
     await db_session.commit()
 
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -133,7 +133,7 @@ async def test_change_password(db_session: AsyncSession, client: AsyncClient) ->
     await db_session.commit()
 
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567",
     )
@@ -199,7 +199,7 @@ async def test_assign_permission(db_session: AsyncSession, client: AsyncClient) 
     await db_session.commit()
 
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567",
     )
@@ -285,7 +285,7 @@ async def test_revoke_permission(db_session: AsyncSession, client: AsyncClient) 
     await db_session.commit()
 
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567",
     )
@@ -346,7 +346,7 @@ async def test_update_user(db_session: AsyncSession, client: AsyncClient) -> Non
     await db_session.commit()
 
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567",
     )

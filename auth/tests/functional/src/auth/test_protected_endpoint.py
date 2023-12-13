@@ -69,14 +69,14 @@ async def test_protected_endpoint_valid_token(
 
     # Sign in first to get an access token
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content=signin_credentials,
     )
     access_token = response_signin.json()["access_token"]
 
     response = await client.post(
-        "/api/v1/verify_access_token/signout",
+        "/api/v1/auth/signout",
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -144,7 +144,7 @@ async def test_protected_endpoint_invalid_token(
 
     # Sign in first to get an access token
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content=signin_credentials,
     )
@@ -152,7 +152,7 @@ async def test_protected_endpoint_invalid_token(
     corrupted_access_token = access_token + "bad"
 
     response = await client.post(
-        "/api/v1/verify_access_token/signout",
+        "/api/v1/auth/signout",
         headers={
             "Authorization": f"Bearer {corrupted_access_token}",
             "Content-Type": "application/json",
@@ -225,7 +225,7 @@ async def test_protected_endpoint_revoked_token(
 
     # Sign in first to get an access token
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content=signin_credentials,
     )
@@ -237,7 +237,7 @@ async def test_protected_endpoint_revoked_token(
     await flushable_redis_client.set(name=decoded_access_token.refresh_jti, value="")
 
     response = await client.post(
-        "/api/v1/verify_access_token/signout",
+        "/api/v1/auth/signout",
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",

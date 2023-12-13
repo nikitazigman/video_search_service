@@ -51,7 +51,7 @@ async def test_create_permission_valid_name(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -113,7 +113,7 @@ async def test_create_permission_already_exists(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -171,7 +171,7 @@ async def test_create_permission_invalid_name(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -230,7 +230,7 @@ async def test_create_permission_forbidden(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -284,7 +284,7 @@ async def test_delete_permission_exists(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -345,7 +345,7 @@ async def test_delete_permission_does_not_exist(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -397,7 +397,7 @@ async def test_delete_permission_forbidden(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -462,7 +462,7 @@ async def test_update_permission_exists(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -528,7 +528,7 @@ async def test_update_permission_does_not_exist(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -590,7 +590,7 @@ async def test_update_permission_invalid_data(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -649,7 +649,7 @@ async def test_update_permission_forbidden(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -716,7 +716,7 @@ async def test_get_permissions(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )
@@ -770,7 +770,7 @@ async def test_get_permission_forbidden(
 
     # Sign in first
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content="username=superuser&password=Ab1234567!",
     )

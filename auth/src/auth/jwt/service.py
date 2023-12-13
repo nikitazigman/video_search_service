@@ -15,8 +15,8 @@ async def validate_jwt(token: str) -> jwt_schemas.JWTDecoded:
     try:
         decoded_token_data = await decode_jwt(
             token=token,
-            key=settings.verify_access_token.jwt_secret_key,
-            algorithms=(settings.verify_access_token.jwt_encoding_algorithm,),
+            key=settings.auth.jwt_secret_key,
+            algorithms=(settings.auth.jwt_encoding_algorithm,),
         )
     except (jose_exc.JWEError, jose_exc.JWTError) as err:
         raise InvalidJWTError from err
@@ -27,8 +27,8 @@ async def validate_jwt(token: str) -> jwt_schemas.JWTDecoded:
 async def create_tokens(identity: jwt_schemas.JWTIdentity) -> list[str]:
     """Create access and refresh tokens pair with the same identity."""
     tokens = (
-        ("access", settings.verify_access_token.access_token_expires_secs),
-        ("refresh", settings.verify_access_token.refresh_token_expires_secs),
+        ("access", settings.auth.access_token_expires_secs),
+        ("refresh", settings.auth.refresh_token_expires_secs),
     )
     created_tokens = []
     for token_type, token_expire_secs in tokens:
@@ -36,9 +36,9 @@ async def create_tokens(identity: jwt_schemas.JWTIdentity) -> list[str]:
             await create_token(
                 data_to_encode=identity,
                 token_type=token_type,
-                secret_key=settings.verify_access_token.jwt_secret_key,
+                secret_key=settings.auth.jwt_secret_key,
                 expires_delta=timedelta(token_expire_secs),
-                algorithm=settings.verify_access_token.jwt_encoding_algorithm,
+                algorithm=settings.auth.jwt_encoding_algorithm,
             )
         )
     return created_tokens

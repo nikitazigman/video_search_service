@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get(
     path="/signin/{provider_slug:str}",
-    response_model=jwt_schemas.AccessToken,
+    response_model=jwt_schemas.JWTCredentials,
     summary="Social sign in",
     description="Sign in with social account",
     response_description="Redirect to social authorization provider",
@@ -57,7 +57,7 @@ async def social_auth(
     user_fingerprint: Annotated[
         auth_depends.UserFingerprint, Depends(auth_depends.get_user_fingerprint)
     ],
-) -> jwt_schemas.AccessToken | RedirectResponse:
+) -> jwt_schemas.JWTCredentials | RedirectResponse:
     try:
         return await social_account_service.sign_in_with_social_provider_account(
             request=request, fingerprint=user_fingerprint

@@ -60,7 +60,7 @@ class SocialAccountService(ISocialAccountService):
 
     async def sign_in_with_social_provider_account(
         self, request: Request, fingerprint: auth_depends.UserFingerprint
-    ) -> jwt_schemas.AccessToken:
+    ) -> jwt_schemas.JWTCredentials:
         """Sign in user using their social account.
 
         Retrieve user info from decoded token.

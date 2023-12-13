@@ -28,7 +28,7 @@ class IUserService(ABC):
     @abstractmethod
     async def signin(
         self, user: auth_depends.UserSignIn, fingerprint: auth_depends.UserFingerprint
-    ) -> jwt_schemas.AccessToken:
+    ) -> jwt_schemas.JWTCredentials:
         ...
 
     @abstractmethod
@@ -124,7 +124,7 @@ class UserService(IUserService):
         user: auth_depends.UserSignIn,
         fingerprint: auth_depends.UserFingerprint,
         verify_password: bool = True,
-    ) -> jwt_schemas.AccessToken:
+    ) -> jwt_schemas.JWTCredentials:
         """Authenticate user and save user's signin record."""
         if user_db := await self.get_by_username(user.username):
             is_password_ok = True

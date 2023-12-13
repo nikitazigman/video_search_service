@@ -29,7 +29,7 @@ rl_settings = get_app_settings().rate_limiter
 
 @router.post(
     path="/signin",
-    response_model=jwt_schemas.AccessToken,
+    response_model=jwt_schemas.JWTCredentials,
     summary="User sign in",
     description="Sign in with username and password",
     response_description="Access and refresh tokens",
@@ -47,7 +47,7 @@ async def signin(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     user_service: Annotated[UserService, Depends(get_user_service)],
     user_fingerprint: Annotated[UserFingerprint, Depends(get_user_fingerprint)],
-) -> jwt_schemas.AccessToken:
+) -> jwt_schemas.JWTCredentials:
     return await user_service.signin(
         user=auth_depends.UserSignIn(
             username=form_data.username,
@@ -150,7 +150,7 @@ async def verify_token(
 
 @router.post(
     path="/token-refresh",
-    response_model=jwt_schemas.AccessToken,
+    response_model=jwt_schemas.JWTCredentials,
     summary="Refresh access token",
     description="Get new access token by providing the refresh token",
     response_description="New JWT credentials",
@@ -168,7 +168,7 @@ async def refresh_token(
     access_token: Annotated[jwt_schemas.JWTDecoded, Depends(handle_access_token)],
     auth_backend: Annotated[JWTAuthorizationBackend, Depends(get_auth_backend)],
     refresh_token: Annotated[jwt_schemas.JWTDecoded, Depends(handle_refresh_token)],
-) -> jwt_schemas.AccessToken:
+) -> jwt_schemas.JWTCredentials:
     if access_token.user == refresh_token.user:
         return await auth_backend.refresh_jwt_credentials(decoded_token=access_token)
     logger.error("Refresh token error: user identities do not match")

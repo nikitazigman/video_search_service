@@ -110,7 +110,7 @@ async def test_signin_user_valid(
     await db_session.commit()
 
     response = await client.post(
-        "/api/v1/verify_access_token/signin", headers=headers, content=content
+        "/api/v1/auth/signin", headers=headers, content=content
     )
     assert response.status_code == expected_status
 
@@ -154,7 +154,7 @@ async def test_signin_user_valid_signin_is_saved(
 
     for _ in range(sign_in_events):
         response = await client.post(
-            "/api/v1/verify_access_token/signin",
+            "/api/v1/auth/signin",
             headers={
                 "Content-Type": "application/x-www-form-urlencoded",
                 "User-Agent": user_agent,
@@ -193,7 +193,7 @@ async def test_signin_user_invalid_signin_is_not_saved(
 ) -> None:
     for _ in range(sign_in_events):
         response = await client.post(
-            "/api/v1/verify_access_token/signin",
+            "/api/v1/auth/signin",
             headers={
                 "Content-Type": "application/x-www-form-urlencoded",
                 "User-Agent": user_agent,
@@ -269,7 +269,7 @@ async def test_signin_user_invalid(
     await db_session.commit()
 
     response = await client.post(
-        "/api/v1/verify_access_token/signin", headers=headers, content=content
+        "/api/v1/auth/signin", headers=headers, content=content
     )
     assert response.status_code == expected_status
     data = response.json()
@@ -326,7 +326,7 @@ async def test_signup_user_does_not_exist(
     expected_data: dict[str, Any],
 ) -> None:
     response = await client.post(
-        "/api/v1/verify_access_token/signup",
+        "/api/v1/auth/signup",
         headers=headers,
         content=orjson.dumps(content),
     )
@@ -413,7 +413,7 @@ async def test_signup_user_exists(
     await db_session.commit()
 
     response = await client.post(
-        "/api/v1/verify_access_token/signup",
+        "/api/v1/auth/signup",
         headers=headers,
         content=orjson.dumps(content),
     )
@@ -476,7 +476,7 @@ async def test_signup_user_invalid_data(
     expected_data: dict[str, Any],
 ) -> None:
     response = await client.post(
-        "/api/v1/verify_access_token/signup",
+        "/api/v1/auth/signup",
         headers=headers,
         content=orjson.dumps(content),
     )
@@ -544,7 +544,7 @@ async def test_signout_user(
 
     # Sign in first to get an access token
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content=signin_credentials,
     )
@@ -552,7 +552,7 @@ async def test_signout_user(
     decoded_access_token = await validate_jwt(access_token)
 
     response = await client.post(
-        "/api/v1/verify_access_token/signout",
+        "/api/v1/auth/signout",
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -626,7 +626,7 @@ async def test_verify_token_valid(
 
     # Sign in first to get an access token
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content=signin_credentials,
     )
@@ -646,13 +646,13 @@ async def test_verify_token_valid(
     access_token_to_verify = await create_token(
         data_to_encode=token_data,
         token_type="access",
-        secret_key=settings.verify_access_token.jwt_secret_key,
+        secret_key=settings.auth.jwt_secret_key,
         expires_delta=timedelta(days=1),
-        algorithm=settings.verify_access_token.jwt_encoding_algorithm,
+        algorithm=settings.auth.jwt_encoding_algorithm,
     )
 
     response = await client.post(
-        "/api/v1/verify_access_token/token-verify",
+        "/api/v1/auth/token-verify",
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -739,14 +739,14 @@ async def test_verify_token_invalid(
 
     # Sign in first to get an access token
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content=signin_credentials,
     )
     access_token = response_signin.json()["access_token"]
 
     response = await client.post(
-        "/api/v1/verify_access_token/token-verify",
+        "/api/v1/auth/token-verify",
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -816,7 +816,7 @@ async def test_verify_token_invalid_revoked(
 
     # Sign in first to get an access token
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content=signin_credentials,
     )
@@ -836,9 +836,9 @@ async def test_verify_token_invalid_revoked(
     access_token_to_verify = await create_token(
         data_to_encode=token_data,
         token_type="access",
-        secret_key=settings.verify_access_token.jwt_secret_key,
+        secret_key=settings.auth.jwt_secret_key,
         expires_delta=timedelta(days=1),
-        algorithm=settings.verify_access_token.jwt_encoding_algorithm,
+        algorithm=settings.auth.jwt_encoding_algorithm,
     )
 
     # Put tokens' jtis into a storage containing revoked tokens
@@ -846,7 +846,7 @@ async def test_verify_token_invalid_revoked(
     await flushable_redis_client.set(name=refresh_jti, value="")
 
     response = await client.post(
-        "/api/v1/verify_access_token/token-verify",
+        "/api/v1/auth/token-verify",
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -919,7 +919,7 @@ async def test_refresh_token_valid(
 
     # Sign in first to get an access token
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content=signin_credentials,
     )
@@ -927,7 +927,7 @@ async def test_refresh_token_valid(
     refresh_token = response_signin.json()["refresh_token"]
 
     response = await client.post(
-        "/api/v1/verify_access_token/token-refresh",
+        "/api/v1/auth/token-refresh",
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -998,7 +998,7 @@ async def test_refresh_token_invalid_from_another_user(
 
     # Sign in first to get an access token
     response_signin = await client.post(
-        "/api/v1/verify_access_token/signin",
+        "/api/v1/auth/signin",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         content=signin_credentials,
     )
@@ -1018,13 +1018,13 @@ async def test_refresh_token_invalid_from_another_user(
     refresh_token = await create_token(
         data_to_encode=token_data,
         token_type="refresh",
-        secret_key=settings.verify_access_token.jwt_secret_key,
+        secret_key=settings.auth.jwt_secret_key,
         expires_delta=timedelta(days=1),
-        algorithm=settings.verify_access_token.jwt_encoding_algorithm,
+        algorithm=settings.auth.jwt_encoding_algorithm,
     )
 
     response = await client.post(
-        "/api/v1/verify_access_token/token-refresh",
+        "/api/v1/auth/token-refresh",
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",

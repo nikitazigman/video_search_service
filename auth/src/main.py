@@ -104,14 +104,14 @@ async def setup_request_id_for_jaeger(
     return await call_next(request)
 
 
-app.include_router(auth_router.router, prefix="/api/v1/verify_access_token", tags=["verify_access_token"])
+app.include_router(auth_router.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(users_router.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(
     permissions_router.router, prefix="/api/v1/permissions", tags=["permissions"]
 )
 app.include_router(social_router.router, prefix="/api/v1/social", tags=["social"])
 
-app.add_middleware(SessionMiddleware, secret_key=settings.verify_access_token.secret_key)
+app.add_middleware(SessionMiddleware, secret_key=settings.auth.secret_key)
 add_pagination(app)
 
 if settings.jaeger.enabled:

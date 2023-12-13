@@ -21,7 +21,7 @@ You can find an example of `.env` file in `.env.example`.
 poetry shell
  ```
 
-3. Run `verify_access_token` service locally:
+3. Run `auth` service locally:
 
 ```commandline
 uvicorn src.main:app --reload
@@ -78,67 +78,67 @@ OpenAPI 3 documentation:
 ```mermaid
 sequenceDiagram
     participant client as Client
-    participant verify_access_token as Auth Service
+    participant auth as Auth Service
     participant db as SQL Database
     participant rd as In-memory DB
     Note right of client: signup
 
-    client ->>+ verify_access_token: signup POST[username, password, ...]
-    verify_access_token ->> verify_access_token: validate input
-    verify_access_token ->> verify_access_token: hash(password)
+    client ->>+ auth: signup POST[username, password, ...]
+    auth ->> auth: validate input
+    auth ->> auth: hash(password)
 
     alt user exists
-        verify_access_token ->>+ db: user exists [username]
-        db ->>- verify_access_token: False
-        verify_access_token ->>- client: 409
+        auth ->>+ db: user exists [username]
+        db ->>- auth: False
+        auth ->>- client: 409
     else user does not exist
-        verify_access_token ->>+ db: user does not exist [username]
-        db ->>- verify_access_token: True
-        verify_access_token ->>+ db: create new user [username, hash(passord), ...]
-        db ->>- verify_access_token: ok
-        verify_access_token ->> client: User(username, ...)
+        auth ->>+ db: user does not exist [username]
+        db ->>- auth: True
+        auth ->>+ db: create new user [username, hash(passord), ...]
+        db ->>- auth: ok
+        auth ->> client: User(username, ...)
     end
 ```
 #### Signin
 ```mermaid
 sequenceDiagram
     participant client as Client
-    participant verify_access_token as Auth Service
+    participant auth as Auth Service
     participant db as SQL Database
     participant rd as In-memory DB
     Note right of client: signin
 
-    client ->>+ verify_access_token: signin POST[username, password, ...]
-    verify_access_token ->> verify_access_token: validate input
-    verify_access_token ->>+ db: get user [username]
-    db ->>- verify_access_token: User(username, hash(password), ...)
-    verify_access_token ->> verify_access_token: compare passwords
+    client ->>+ auth: signin POST[username, password, ...]
+    auth ->> auth: validate input
+    auth ->>+ db: get user [username]
+    db ->>- auth: User(username, hash(password), ...)
+    auth ->> auth: compare passwords
 
     alt user is valid
-        verify_access_token ->> verify_access_token: generate access and refresh tokens
-        verify_access_token ->> rd: set(user_id, refresh, <expire>)
-        verify_access_token ->> client: access, refresh, User(username, ...)
+        auth ->> auth: generate access and refresh tokens
+        auth ->> rd: set(user_id, refresh, <expire>)
+        auth ->> client: access, refresh, User(username, ...)
     else user is not valid
-        verify_access_token ->>- client: 401
+        auth ->>- client: 401
     end
 ```
 #### Signout
 ```mermaid
 sequenceDiagram
     participant client as Client
-    participant verify_access_token as Auth Service
+    participant auth as Auth Service
     participant db as SQL Database
     participant rd as In-memory DB
     Note right of client: signout
 
-    client ->>+ verify_access_token: signout POST[] Header[access]
-    verify_access_token ->> verify_access_token: verify token
+    client ->>+ auth: signout POST[] Header[access]
+    auth ->> auth: verify token
     alt token is valid
-        verify_access_token ->> rd: set(access, banned, <expire>)
-        verify_access_token ->> rd: set(refresh, banned, <expire>)
-        verify_access_token ->> client: 200
+        auth ->> rd: set(access, banned, <expire>)
+        auth ->> rd: set(refresh, banned, <expire>)
+        auth ->> client: 200
     else token is not valid
-        verify_access_token ->>- client: 401
+        auth ->>- client: 401
     end
 ```
 
@@ -146,155 +146,155 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant client as Client
-    participant verify_access_token as Auth Service
+    participant auth as Auth Service
     participant db as SQL Database
     participant rd as In-memory DB
     Note right of client: verify
 
-    client ->>+ verify_access_token: verify POST[access token]
-    verify_access_token ->> verify_access_token: verify token
+    client ->>+ auth: verify POST[access token]
+    auth ->> auth: verify token
 
     alt token is valid
         alt token is not banned
-            verify_access_token ->>+ rd: get(access)
-            rd ->>+ verify_access_token: None
-            verify_access_token ->> client: 200, the same access token
+            auth ->>+ rd: get(access)
+            rd ->>+ auth: None
+            auth ->> client: 200, the same access token
         else token is banned
-            verify_access_token ->>+ rd: get(access)
-            rd ->>+ verify_access_token: banned
-            verify_access_token ->>+ client: 200 {"status": "Provided access token is invalid"}
+            auth ->>+ rd: get(access)
+            rd ->>+ auth: banned
+            auth ->>+ client: 200 {"status": "Provided access token is invalid"}
         end
     else token is not valid
-        verify_access_token ->>+ client: 401
+        auth ->>+ client: 401
     end
 ```
 #### Refresh
 ```mermaid
 sequenceDiagram
     participant client as Client
-    participant verify_access_token as Auth Service
+    participant auth as Auth Service
     participant db as SQL Database
     participant rd as In-memory DB
     Note right of client: refresh
 
-    client ->>+ verify_access_token: refresh POST[refresh token]
-    verify_access_token ->> verify_access_token: verify token
+    client ->>+ auth: refresh POST[refresh token]
+    auth ->> auth: verify token
 
     alt token is valid
         alt token is not banned
-            verify_access_token ->>+ rd: get(refresh)
-            rd ->>+ verify_access_token: None
-            verify_access_token ->> verify_access_token: generate access, refresh token pair
-            verify_access_token ->> client: JWTCredentials(access, refresh)
+            auth ->>+ rd: get(refresh)
+            rd ->>+ auth: None
+            auth ->> auth: generate access, refresh token pair
+            auth ->> client: JWTCredentials(access, refresh)
         else token is banned
-            verify_access_token ->>+ rd: get(access)
-            rd ->>+ verify_access_token: banned
-            verify_access_token ->>+ client: 409
+            auth ->>+ rd: get(access)
+            rd ->>+ auth: banned
+            auth ->>+ client: 409
         end
     else token is not valid
-        verify_access_token ->>+ client: 401
+        auth ->>+ client: 401
     end
 ```
 #### Get user
 ```mermaid
 sequenceDiagram
     participant client as Client
-    participant verify_access_token as Auth Service
+    participant auth as Auth Service
     participant db as SQL Database
     participant rd as In-memory DB
     Note right of client: GET USER
 
-    client ->>+ verify_access_token: GET /user HEADER[access]
-    verify_access_token ->> verify_access_token: verify token
+    client ->>+ auth: GET /user HEADER[access]
+    auth ->> auth: verify token
 
     alt token is valid
         alt token is not banned
-            verify_access_token ->>+ rd: get(access)
-            rd ->>+ verify_access_token: None
-            verify_access_token ->> verify_access_token: get user_id from a jwt payload part
-            verify_access_token ->>+ db: get user(id==user_id)
-            db ->>- verify_access_token: User(username, ...)
-            verify_access_token ->> client: the serialized User
+            auth ->>+ rd: get(access)
+            rd ->>+ auth: None
+            auth ->> auth: get user_id from a jwt payload part
+            auth ->>+ db: get user(id==user_id)
+            db ->>- auth: User(username, ...)
+            auth ->> client: the serialized User
         else token is banned
-            verify_access_token ->>+ rd: get(access)
-            rd ->>+ verify_access_token: banned
-            verify_access_token ->>+ client: 401
+            auth ->>+ rd: get(access)
+            rd ->>+ auth: banned
+            auth ->>+ client: 401
         end
     else token is not valid
-        verify_access_token ->>+ client: 401
+        auth ->>+ client: 401
     end
 ```
 #### Update user
 ```mermaid
 sequenceDiagram
     participant client as Client
-    participant verify_access_token as Auth Service
+    participant auth as Auth Service
     participant db as SQL Database
     participant rd as In-memory DB
     Note right of client: Update USER
 
-    client ->>+ verify_access_token: PUT[username, ...] /user HEADER[access]
-    verify_access_token ->> verify_access_token: verify token
-    verify_access_token ->> verify_access_token: validate input data
+    client ->>+ auth: PUT[username, ...] /user HEADER[access]
+    auth ->> auth: verify token
+    auth ->> auth: validate input data
     alt data is valid:
         alt token is valid
             alt token is not banned
-                verify_access_token ->>+ rd: get(access)
-                rd ->>+ verify_access_token: None
-                verify_access_token ->> verify_access_token: get user_id from a jwt payload part
-                verify_access_token ->>+ db: update user(id==user_id).update(username, ...)
-                db ->>- verify_access_token: User(username, ...)
-                verify_access_token ->> client: the serialized User
+                auth ->>+ rd: get(access)
+                rd ->>+ auth: None
+                auth ->> auth: get user_id from a jwt payload part
+                auth ->>+ db: update user(id==user_id).update(username, ...)
+                db ->>- auth: User(username, ...)
+                auth ->> client: the serialized User
             else token is banned
-                verify_access_token ->>+ rd: get(access)
-                rd ->>+ verify_access_token: banned
-                verify_access_token ->>+ client: 401
+                auth ->>+ rd: get(access)
+                rd ->>+ auth: banned
+                auth ->>+ client: 401
             end
         else token is not valid
-            verify_access_token ->>+ client: 401
+            auth ->>+ client: 401
         end
     else data is not valid:
-        verify_access_token ->>+ client: 422
+        auth ->>+ client: 422
     end
 ```
 #### Update password
 ```mermaid
 sequenceDiagram
     participant client as Client
-    participant verify_access_token as Auth Service
+    participant auth as Auth Service
     participant db as SQL Database
     participant rd as In-memory DB
     Note right of client: Update password
 
-    client ->>+ verify_access_token:  /password/change POST[old_pass, pass] HEADER[access]
-    verify_access_token ->> verify_access_token: verify token
-    verify_access_token ->> verify_access_token: validate input data
+    client ->>+ auth:  /password/change POST[old_pass, pass] HEADER[access]
+    auth ->> auth: verify token
+    auth ->> auth: validate input data
     alt data is valid:
         alt token is valid
             alt token is not banned
-                verify_access_token ->>+ rd: get(access)
-                rd ->>+ verify_access_token: None
-                verify_access_token ->> verify_access_token: get user_id from a jwt payload part
-                verify_access_token ->>+ db: get user(id==user_id).passsword
-                db ->>- verify_access_token: hash(password)
-                verify_access_token ->> verify_access_token: check passords(old_pass, password)
+                auth ->>+ rd: get(access)
+                rd ->>+ auth: None
+                auth ->> auth: get user_id from a jwt payload part
+                auth ->>+ db: get user(id==user_id).passsword
+                db ->>- auth: hash(password)
+                auth ->> auth: check passords(old_pass, password)
                 alt hash is valid
-                    verify_access_token ->>+ db: update user(id==user_id).update(pass, ...)
-                    db ->>- verify_access_token: User(username, ...)
-                    verify_access_token ->> client: the serialized User
+                    auth ->>+ db: update user(id==user_id).update(pass, ...)
+                    db ->>- auth: User(username, ...)
+                    auth ->> client: the serialized User
                 else hash is not valid
-                    verify_access_token ->>- client: 401
+                    auth ->>- client: 401
                 end
             else token is banned
-                verify_access_token ->>+ rd: get(access)
-                rd ->>+ verify_access_token: banned
-                verify_access_token ->>+ client: 401
+                auth ->>+ rd: get(access)
+                rd ->>+ auth: banned
+                auth ->>+ client: 401
             end
         else token is not valid
-            verify_access_token ->>+ client: 401
+            auth ->>+ client: 401
         end
     else data is not valid:
-        verify_access_token ->>+ client: 422
+        auth ->>+ client: 422
     end
 ```
 ### Entity diagram
@@ -391,7 +391,7 @@ To provide sign in using social accounts, you need to create an application in t
 
 After that, you will receive a `client_id` and a `client_secret`.
 
-- GET `/api/v1/verify_access_token/social/login/{provider_slug}` - redirect to the provider's authorization page.
-- GET `/api/v1/verify_access_token/social/verify_access_token/{provider_slug}` - callback url, where the provider will redirect the user after authorization.
+- GET `/api/v1/auth/social/login/{provider_slug}` - redirect to the provider's authorization page.
+- GET `/api/v1/auth/social/auth/{provider_slug}` - callback url, where the provider will redirect the user after authorization.
 
 _Note: when testing, do not use OpenAPI UI, because it does not support redirects._
