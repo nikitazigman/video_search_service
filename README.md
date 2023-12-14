@@ -1,7 +1,28 @@
-# Проектная работа: диплом
+# CDN service
 
-У вас будет один репозиторий на все 4 недели работы над дипломным проектом. 
+**[Link to the project to be reviewed](https://github.com/alena-kono/graduate_work)**
 
-Если вы выбрали работу в командах, ревью будет организовано как в командных модулях с той лишь разницей, что формируете состав команды и назначаете тимлида вы сами, а не команда сопровождения.
+## Components
+### Auth service
+Check the documentation [here](auth/README.md).
 
-Удачи!
+### CDN API service
+Check the documentation [here](cdn_api/README.md).
+
+### Video Converter service
+Check the documentation [here](video_converter/README.md).
+
+### Stream API service
+Check the documentation [here](stream_api/README.md).
+
+## Service ports mappings for the local development
+0. `auth`: port 8001
+1. `cdn_api`: port 8002
+2. `stream_api`: port 8003
+
+## HOW TO
+
+### HOW TO START
+
+1. Run the `dev` compose (see [here](#start-a-dev-infrastructure))
+2. Set up each service following docs from [this section](#components).

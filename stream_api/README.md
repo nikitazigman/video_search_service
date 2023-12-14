@@ -16,7 +16,7 @@
 4. Run `Stream API` service:
     ``` bash
     # under the poetry virtual env
-    python -m src.main
+    python -m stream_api.main
     ```
 5. Run `auth` service following [the documentation](../auth/README.md).
 
