@@ -8,6 +8,7 @@ import structlog
 
 from starlette import status
 
+from stream_api.dependencies import auth as auth_deps
 from stream_api.dependencies import requests as request_deps
 from stream_api.services.manifest import (
     VideoManifestFileServiceProtocol,
@@ -23,6 +24,8 @@ logger = structlog.get_logger()
 
 router = fastapi.APIRouter()
 
+jwt_bearer = auth_deps.JWTBearer()
+
 
 @router.get(
     path="/hls/manifest/{video_id}",
@@ -31,6 +34,7 @@ router = fastapi.APIRouter()
     status_code=status.HTTP_200_OK,
 )
 async def get_video_manifest_file(
+    _: tp.Annotated[None, fastapi.Depends(jwt_bearer)],
     video_id: uuid.UUID,
     video_manifest_service: tp.Annotated[
         VideoManifestFileServiceProtocol, fastapi.Depends(get_video_manifest_service)
