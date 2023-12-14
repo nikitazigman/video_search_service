@@ -18,3 +18,6 @@
     # under the poetry virtual env
     python -m src.main
     ```
+5. Run `auth` service following [the documentation](../auth/README.md).
+
+6. Run `cdn_api` service following [the documentation](../cdn_api/README.md).
