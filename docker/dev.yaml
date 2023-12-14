@@ -1,7 +1,6 @@
 version: "3.8"
 
-include:
-  - elk.yaml
+name: "cdn_service"
 
 services:
   authDB:
@@ -41,7 +40,7 @@ services:
       retries: 10
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.12.10-management
     container_name: rabbitmq
     restart: unless-stopped
     environment:
@@ -70,7 +69,7 @@ services:
       retries: 10
   
   minio:
-    image: quay.io/minio/minio:latest
+    image: quay.io/minio/minio:RELEASE.2023-12-13T23-28-55Z
     container_name: minio
     ports:
       - "9000:9000"
@@ -78,8 +77,8 @@ services:
     volumes:
       - s3_data:/data
     environment:
-      MINIO_ROOT_USER: ROOTUSER
-      MINIO_ROOT_PASSWORD: CHANGEME123
+      MINIO_ROOT_USER: "ROOTUSER"
+      MINIO_ROOT_PASSWORD: "CHANGEME123"
     command: server /data --console-address ":9090"
 
 volumes:

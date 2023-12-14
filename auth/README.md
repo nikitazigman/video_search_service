@@ -1,4 +1,4 @@
-# Auth (Sprint 7)
+# Auth
 
 ## Getting started
 
@@ -55,17 +55,14 @@ create-superuser --username superadmin --first-name Jack --last-name Smith
 OpenAPI 3 documentation:
 
 - Swagger
-
     ```
-    GET /api/openapi
+    GET /docs
     ```
 
 - ReDoc
-
     ```
     GET /redoc
     ```
-
 - OpenAPI json
 
     ```

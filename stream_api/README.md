@@ -16,8 +16,28 @@
 4. Run `Stream API` service:
     ``` bash
     # under the poetry virtual env
-    python -m src.main
+    python -m stream_api.main
     ```
 5. Run `auth` service following [the documentation](../auth/README.md).
 
 6. Run `cdn_api` service following [the documentation](../cdn_api/README.md).
+
+
+## Service documentation
+
+OpenAPI 3 documentation:
+
+- Swagger
+    ```
+    GET /docs
+    ```
+
+- ReDoc
+    ```
+    GET /redoc
+    ```
+
+- OpenAPI json
+    ```
+    GET /api/openapi.json
+    ```
