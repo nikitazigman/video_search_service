@@ -1,7 +1,6 @@
 version: "3.8"
 
-include:
-  - elk.yaml
+name: "cdn_service"
 
 services:
   authDB:
@@ -78,8 +77,8 @@ services:
     volumes:
       - s3_data:/data
     environment:
-      MINIO_ROOT_USER: ROOTUSER
-      MINIO_ROOT_PASSWORD: CHANGEME123
+      MINIO_ROOT_USER: "ROOTUSER"
+      MINIO_ROOT_PASSWORD: "CHANGEME123"
     command: server /data --console-address ":9090"
 
 volumes:
