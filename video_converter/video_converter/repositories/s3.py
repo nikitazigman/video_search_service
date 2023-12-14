@@ -2,6 +2,9 @@ from pathlib import Path
 from typing import Protocol
 
 from miniopy_async import Minio  # type: ignore
+from miniopy_async.error import MinioException
+
+from video_converter.exceptions import VideoConverterMinioException
 
 
 class S3RepoProtocol(Protocol):
@@ -25,17 +28,23 @@ class S3Repo:
     async def upload_file(
         self, file: Path, bucket_name: str, relative_path: Path
     ) -> None:
-        await self.client.fput_object(
-            bucket_name=bucket_name,
-            object_name=str(file.relative_to(relative_path)),
-            file_path=str(file),
-        )
+        try:
+            await self.client.fput_object(
+                bucket_name=bucket_name,
+                object_name=str(file.relative_to(relative_path)),
+                file_path=str(file),
+            )
+        except (OSError, MinioException) as e:
+            raise VideoConverterMinioException from e
 
     async def create_bucket(self, bucket_name: str) -> None:
-        if await self.client.bucket_exists(bucket_name):
-            return None
+        try:
+            if await self.client.bucket_exists(bucket_name):
+                return None
 
-        await self.client.make_bucket(bucket_name)
+            await self.client.make_bucket(bucket_name)
+        except(OSError, MinioException) as e:
+            raise VideoConverterMinioException from e
 
     async def upload_chunks(self, bucket_name: str, folder: Path) -> None:
         await self.create_bucket(bucket_name)
@@ -48,17 +57,23 @@ class S3Repo:
                 else:
                     await self.upload_file(item, bucket_name, relative_path)
 
-        await _upload_files(folder)
+        try:
+            await _upload_files(folder)
+        except(OSError, MinioException) as e:
+            raise VideoConverterMinioException from e
 
     async def download_video(
         self, bucket_name: str, file_name: str, path: Path
     ) -> Path:
-        await self.client.fget_object(
-            bucket_name=bucket_name,
-            object_name=file_name,
-            file_path=str(path),
-        )
-        return path / file_name
+        try:
+            await self.client.fget_object(
+                bucket_name=bucket_name,
+                object_name=file_name,
+                file_path=str(path),
+            )
+            return path / file_name
+        except (OSError, MinioException) as e:
+            raise VideoConverterMinioException from e
 
 
 def get_s3_repo(s3_client: Minio) -> S3RepoProtocol:

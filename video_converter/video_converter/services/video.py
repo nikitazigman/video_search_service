@@ -1,3 +1,5 @@
+import logging
+
 from datetime import datetime
 from pathlib import Path
 from typing import Protocol
@@ -13,6 +15,9 @@ from video_converter.utils.converter import (
     VideoConverterProtocol,
     get_video_converter,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class VideoServiceProtocol(Protocol):
@@ -32,12 +37,15 @@ class VideoService:
         self.video_converter = video_converter
 
     def remove_dir(self, path: Path) -> None:
-        for item in path.iterdir():
-            if item.is_dir():
-                self.remove_dir(item)
-            else:
-                item.unlink()
-        path.rmdir()
+        try:
+            for item in path.iterdir():
+                if item.is_dir():
+                    self.remove_dir(item)
+                else:
+                    item.unlink()
+            path.rmdir()
+        except OSError as e:
+            logger.exception(f"Unexpected error during clean up of directory: {e}")
 
     async def process(self, body: VideoInputSchema) -> None:
         tmp_folder = self.tmp_folder / str(datetime.now().timestamp())

@@ -2,6 +2,8 @@ import subprocess
 from pathlib import Path
 from typing import Protocol
 
+from video_converter.exceptions import VideoConverterOSError
+
 from asgiref.sync import sync_to_async
 
 
@@ -50,14 +52,18 @@ class VideoConverter:
             frame_size=frame_size,
             output_path=str(output_path),
         )
-        output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with subprocess.Popen(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        ) as process:
-            process.communicate()
-            if process.returncode != 0:
-                raise RuntimeError("Error while converting video.")
+        try:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with subprocess.Popen(
+                cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ) as process:
+                process.communicate()
+                if process.returncode != 0:
+                    raise RuntimeError("Error while converting video.")
+        except (OSError, RuntimeError, subprocess.SubprocessError) as e:
+            raise VideoConverterOSError from e
 
 
 def get_video_converter() -> VideoConverter:
