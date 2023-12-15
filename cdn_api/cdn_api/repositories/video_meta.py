@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Sequence
 from typing import Protocol
 from uuid import UUID
@@ -12,6 +13,9 @@ from sqlalchemy import delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, ArgumentError, SQLAlchemyError
 from pydantic import ValidationError
+
+
+logger = logging.getLogger(__name__)
 
 
 class VideoMetaRepositoryProtocol(Protocol):
@@ -35,6 +39,7 @@ class VideoMetaRepository:
         self.session = session
 
     async def get_by_id(self, video_id: UUID) -> VideoSchema:
+        logger.info(f"Obtaining video meta: {video_id}")
         select_stmt = select(VideoMeta).where(VideoMeta.id == video_id)
         video_meta_model = await self.session.scalar(select_stmt)
         return VideoSchema.model_validate(video_meta_model)
@@ -54,6 +59,7 @@ class VideoMetaRepository:
     async def insert(
         self, name: str, original_bucket: str, bucket_hlc: str, video_id: UUID
     ) -> VideoSchema:
+        logger.info(f"Inserting new video meta. id: {video_id}, bucket: {original_bucket}, hlc: {bucket_hlc}")
         try:
             insert_stmt = (
                 insert(VideoMeta)
@@ -74,6 +80,7 @@ class VideoMetaRepository:
             raise DBServerException from e
 
     async def delete(self, video_id: UUID) -> None:
+        logger.info(f"Deleting video meta: {video_id}")
         delete_stmt = delete(VideoMeta).where(VideoMeta.id == video_id)
         await self.session.execute(delete_stmt)
 
