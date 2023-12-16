@@ -56,3 +56,12 @@ Check the documentation [here](stream_api/README.md).
    curl --location 'http://localhost:8003/api/v1/hls/manifest/c1efb7fe-d8a1-45ee-b939-e7c4df8cd666' \
    --header 'Authorization: ACCESS_TOKEN'
    ```
+
+## How to run production version in docker?
+
+1) copy cdn_api, stream_api, video_converter .env.prod.example into .env.prod in the same folders
+2) copy ./docker/.env.prod.example into ./docker/.env.prod
+3) execute set -a && source ./docker/.env.prod
+4) execute ./scripts/prod.sh up
+5) go to [localhost:9001](http://localhost:9001) and login with minio credentials from env file and generate new minio access key
+6) replace minio keys in .env.prod files in cdn_api, stream_api, video_converter
