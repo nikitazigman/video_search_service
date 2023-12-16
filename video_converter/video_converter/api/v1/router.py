@@ -3,9 +3,9 @@ import logging
 from faststream import Depends
 from faststream.rabbit import RabbitRouter
 
+from video_converter.exceptions import VideoConverterError
 from video_converter.schemas.input import VideoInputSchema
 from video_converter.services.video import VideoService, get_video_service
-from video_converter.exceptions import VideoConverterMinioException, VideoConverterError
 
 logger = logging.getLogger(__name__)
 

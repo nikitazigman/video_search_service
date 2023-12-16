@@ -3,16 +3,16 @@ from collections.abc import Sequence
 from typing import Protocol
 from uuid import UUID
 
+from cdn_api.exceptions import DBClientException, DBServerException
 from cdn_api.models.video import VideoMeta
 from cdn_api.schemas.responses import VideoSchema
-from cdn_api.exceptions import DBClientException, DBServerException
 
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import delete, insert, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, ArgumentError, SQLAlchemyError
 from pydantic import ValidationError
+from sqlalchemy import delete, insert, select
+from sqlalchemy.exc import ArgumentError, IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class VideoMetaRepository:
         except (IntegrityError, ValidationError, ArgumentError) as e:
             raise DBClientException("Incorrect data was provided!") from e
         # Any other sql alchemy or network errors should be considered as server failure
-        except (SQLAlchemyError, IOError) as e:
+        except (OSError, SQLAlchemyError) as e:
             raise DBServerException from e
 
     async def delete(self, video_id: UUID) -> None:
