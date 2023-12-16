@@ -1,3 +1,4 @@
+import logging
 from typing import Protocol
 
 from fastapi import UploadFile
@@ -5,6 +6,9 @@ from miniopy_async import Minio  # type: ignore
 from miniopy_async.error import S3Error, ServerError
 
 from cdn_api.exceptions import VideoUploadS3ServerException
+
+
+logger = logging.getLogger(__name__)
 
 
 class S3RepoProtocol(Protocol):
@@ -36,21 +40,25 @@ class S3Repo:
         self.client = client
 
     async def create_bucket(self, bucket_name: str) -> None:
+        logger.info(f"Creating bucket: {bucket_name}")
         if await self.client.bucket_exists(bucket_name):
             return None
 
         await self.client.make_bucket(bucket_name)
 
     async def delete_bucket(self, bucket_name: str) -> None:
+        logger.info(f"Deleting bucket: {bucket_name}")
         await self.client.remove_objects(bucket_name, recursive=True)
         await self.client.remove_bucket(bucket_name)
 
     async def delete_file(self, bucket_name: str, file_name: str) -> None:
+        logger.info(f"Deleting file: {bucket_name}")
         await self.client.remove_object(bucket_name, file_name)
 
     async def upload_video(
         self, bucket_name: str, file_name: str, file: UploadFile
     ) -> None:
+        logger.info(f"Uploading new file: {file_name}, bucket: {bucket_name}")
         try:
             await self.create_bucket(bucket_name)
 

@@ -1,3 +1,4 @@
+import typing as tp
 from functools import lru_cache
 from pathlib import Path
 
@@ -69,6 +70,36 @@ class Settings(BaseSettings):
 
     def redis_dsn(self) -> str:
         return f"redis://{self.redis_host}:{self.redis_port}"
+
+    @property
+    def logging_config(self) -> dict[str, tp.Any]:
+        return {
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "default": {
+                    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                }
+            },
+            "handlers": {
+                "console": {
+                    "level": "DEBUG",
+                    "class": "logging.StreamHandler",
+                    "formatter": "default",
+                },
+            },
+            "loggers": {
+                "": {
+                    "handlers": ["console"],
+                    "level": self.logging_level,
+                },
+                "uvicorn.access": {
+                    "handlers": ["console"],
+                    "level": self.logging_level,
+                    "propagate": False
+                },
+            },
+        }
 
 
 @lru_cache(maxsize=1)

@@ -4,6 +4,7 @@ from http import HTTPStatus
 from typing import Annotated
 from uuid import UUID
 
+from cdn_api.exceptions import CDNClientException, CDNServerException
 from cdn_api.schemas import requests, responses
 from cdn_api.schemas.jwt import JwtClaims
 from cdn_api.services.video import (
@@ -16,7 +17,6 @@ from cdn_api.utils.dependencies import (
     check_permission,
 )
 from cdn_api.utils.user_roles import UserRoles
-from cdn_api.exceptions import CDNClientException, CDNServerException
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -54,7 +54,9 @@ async def upload_video(
         return await service.upload(video_file)
     except CDNClientException as e:
         logger.exception(f"Client error: {e}")
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail={'error': str(e)})
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail={"error": str(e)}
+        )
     except CDNServerException as e:
         logger.exception(f"Server error: {e}")
         # Don't send any details in order to not compromise server implementation details / technologies

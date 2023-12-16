@@ -1,7 +1,9 @@
+import logging
+
 from contextlib import asynccontextmanager
 
-from cdn_api.api.v1.video import router as files_router
 from cdn_api.api.v1.task import router as task_router
+from cdn_api.api.v1.video import router as files_router
 from cdn_api.configs.minio import init_s3_client
 from cdn_api.configs.postgres import close_async_engine, init_async_engine
 from cdn_api.configs.rabbitmq import close_rabbitmq, init_rabbitmq
@@ -15,6 +17,7 @@ from fastapi.responses import ORJSONResponse
 
 settings = get_settings()
 
+logging.config.dictConfig(settings.logging_config)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,7 +45,7 @@ def pong() -> dict[str, str]:
     return {"ping": "pong!"}
 
 
-app.include_router(files_router, prefix="/api/v1", tags=["files"])
+app.include_router(files_router, prefix="/api/v1/video", tags=["files"])
 app.include_router(task_router, prefix="/api/v1/tasks", tags=["tasks"])
 
 if __name__ == "__main__":

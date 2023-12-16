@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from types import TracebackType
 from typing import Protocol, Self
@@ -22,6 +23,9 @@ from cdn_api.utils.dependencies import (
 from aio_pika.abc import AbstractRobustChannel, AbstractTransaction
 from miniopy_async import Minio  # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+logger = logging.getLogger(__name__)
 
 
 class VideoUOWProtocol(Protocol):
@@ -81,6 +85,7 @@ class VideoUOW:
             raise exception
 
     async def commit(self) -> None:
+        logger.info("Commit video uow transaction")
         if self.rabbit_transaction is None:
             raise RuntimeError("RabbitMQ transaction is not initialized")
         await asyncio.gather(
@@ -89,6 +94,7 @@ class VideoUOW:
         )
 
     async def rollback(self) -> None:
+        logger.debug("Rollback video uow transaction")
         if self.rabbit_transaction is None:
             raise RuntimeError("RabbitMQ transaction is not initialized")
 

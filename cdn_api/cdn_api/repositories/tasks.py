@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Sequence
 from typing import Protocol
 from uuid import UUID
@@ -12,6 +13,9 @@ from sqlalchemy import delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, ArgumentError, SQLAlchemyError
 from pydantic import ValidationError
+
+
+logger = logging.getLogger(__name__)
 
 
 class TaskRepositoryProtocol(Protocol):
@@ -33,6 +37,7 @@ class TaskRepository:
         self.session = session
 
     async def get_by_id(self, task_id: UUID) -> TaskSchema | None:
+        logger.info(f"Obtaining task: {task_id}")
         try:
             select_stmt = select(Task).where(Task.id == task_id)
             task_model = await self.session.scalar(select_stmt)
@@ -53,6 +58,7 @@ class TaskRepository:
         return files_info
 
     async def insert(self, status: Status, video_meta_id: UUID) -> TaskSchema:
+        logger.info(f"Inserting new task. status: {status}, video_meta_id: {video_meta_id}")
         try:
             insert_stmt = (
                 insert(Task)
@@ -68,6 +74,7 @@ class TaskRepository:
             raise DBServerException from e
 
     async def delete(self, task_id: UUID) -> None:
+        logger.info(f"Deleting task: {task_id}")
         delete_stmt = delete(Task).where(Task.id == task_id)
         await self.session.execute(delete_stmt)
 

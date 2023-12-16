@@ -1,17 +1,21 @@
+import logging
 from collections.abc import Sequence
 from typing import Protocol
 from uuid import UUID
 
+from cdn_api.exceptions import DBClientException, DBServerException
 from cdn_api.models.video import VideoMeta
 from cdn_api.schemas.responses import VideoSchema
-from cdn_api.exceptions import DBClientException, DBServerException
 
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import delete, insert, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, ArgumentError, SQLAlchemyError
 from pydantic import ValidationError
+from sqlalchemy import delete, insert, select
+from sqlalchemy.exc import ArgumentError, IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
+logger = logging.getLogger(__name__)
 
 
 class VideoMetaRepositoryProtocol(Protocol):
@@ -35,6 +39,7 @@ class VideoMetaRepository:
         self.session = session
 
     async def get_by_id(self, video_id: UUID) -> VideoSchema:
+        logger.info(f"Obtaining video meta: {video_id}")
         select_stmt = select(VideoMeta).where(VideoMeta.id == video_id)
         video_meta_model = await self.session.scalar(select_stmt)
         return VideoSchema.model_validate(video_meta_model)
@@ -54,6 +59,7 @@ class VideoMetaRepository:
     async def insert(
         self, name: str, original_bucket: str, bucket_hlc: str, video_id: UUID
     ) -> VideoSchema:
+        logger.info(f"Inserting new video meta. id: {video_id}, bucket: {original_bucket}, hlc: {bucket_hlc}")
         try:
             insert_stmt = (
                 insert(VideoMeta)
@@ -70,10 +76,11 @@ class VideoMetaRepository:
         except (IntegrityError, ValidationError, ArgumentError) as e:
             raise DBClientException("Incorrect data was provided!") from e
         # Any other sql alchemy or network errors should be considered as server failure
-        except (SQLAlchemyError, IOError) as e:
+        except (OSError, SQLAlchemyError) as e:
             raise DBServerException from e
 
     async def delete(self, video_id: UUID) -> None:
+        logger.info(f"Deleting video meta: {video_id}")
         delete_stmt = delete(VideoMeta).where(VideoMeta.id == video_id)
         await self.session.execute(delete_stmt)
 
