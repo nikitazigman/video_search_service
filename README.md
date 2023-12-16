@@ -65,3 +65,5 @@ Check the documentation [here](stream_api/README.md).
 4) execute ./scripts/prod.sh up
 5) go to [localhost:9001](http://localhost:9001) and login with minio credentials from env file and generate new minio access key
 6) replace minio keys in .env.prod files in cdn_api, stream_api, video_converter
+7) down the server ./scripts/prod.sh down
+8) restart the server ./scripts/prod.sh up
