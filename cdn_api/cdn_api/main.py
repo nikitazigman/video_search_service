@@ -1,3 +1,5 @@
+import logging
+
 from contextlib import asynccontextmanager
 
 from cdn_api.api.v1.video import router as files_router
@@ -15,6 +17,7 @@ from fastapi.responses import ORJSONResponse
 
 settings = get_settings()
 
+logging.config.dictConfig(settings.logging_config)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
