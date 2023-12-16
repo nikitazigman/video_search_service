@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     minio_endpoint: str
     minio_access_key: str
     minio_secret_key: str
+    minio_secure: bool = True
 
     original_bucket: str = "original"
     hlc_bucket: str = "hlc"

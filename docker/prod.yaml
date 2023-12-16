@@ -1,0 +1,159 @@
+version: "3.8"
+
+name: "cdn_service_prod"
+
+services:
+  nginx:
+    image: nginx:1.25.3
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./configs/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./configs/nginx/site.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      auth_api:
+        condition: service_started
+      cdn_api:
+        condition: service_started
+      stream_api:
+        condition: service_started
+
+  auth_api:
+    container_name: auth_api
+    build:
+      context: ../auth
+    env_file:
+      - ../auth/.env.prod
+    restart: on-failure
+    depends_on:
+      authDB:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  cdn_api:
+    container_name: cdn_api
+    build:
+      context: ../cdn_api
+    env_file:
+      - ../cdn_api/.env.prod
+    restart: on-failure
+    depends_on:
+      cdnDB:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio_api:
+        condition: service_started
+
+  video_converter:
+    container_name: video_converter
+    build:
+      context: ../video_converter
+    env_file:
+      - ../video_converter/.env.prod
+    restart: on-failure
+    depends_on:
+      cdnDB:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio_api:
+        condition: service_started
+
+  stream_api:
+    container_name: stream_api
+    build:
+      context: ../stream_api
+    env_file:
+      - ../stream_api/.env.prod
+    depends_on:
+      cdnDB:
+        condition: service_healthy
+      auth_api:
+        condition: service_started
+      minio_api:
+        condition: service_started
+
+  authDB:
+    image: postgres:15.3
+    container_name: auth_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+      POSTGRES_DB: auth_db
+    volumes:
+      - auth_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  cdnDB:
+    image: postgres:15.3
+    container_name: cdn_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cdn
+      POSTGRES_PASSWORD: cdn
+      POSTGRES_DB: cdn_db
+    volumes:
+      - cdn_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cdn -d cdn_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.12.10-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    env_file:
+      - ./.env.prod
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.0.11
+    container_name: redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+  
+  minio_api:
+    image: quay.io/minio/minio:RELEASE.2023-12-13T23-28-55Z
+    container_name: minio_api
+    hostname: minio-api
+    expose:
+      - "9000"
+    volumes:
+      - s3_data:/data
+    env_file:
+      - ./.env.prod
+    command: server --address ":9000" /data
+
+  minio_console:
+    image: quay.io/minio/minio:RELEASE.2023-12-13T23-28-55Z
+    container_name: minio_console
+    ports:
+      - "9001:9001"
+    volumes:
+      - s3_data:/data
+    env_file:
+      - ./.env.prod
+    command: server --console-address ":9001" /data
+
+volumes:
+  auth_db:
+  cdn_db:
+  s3_data:

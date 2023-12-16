@@ -13,7 +13,7 @@ def init_s3_client(settings: Settings) -> None:
         endpoint=settings.minio_endpoint,
         access_key=settings.minio_access_key,
         secret_key=settings.minio_secret_key,
-        secure=not settings.debug,
+        secure=settings.minio_secure,
     )
 
 

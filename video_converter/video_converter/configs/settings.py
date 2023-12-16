@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     minio_endpoint: str
     minio_access_key: str
     minio_secret_key: str
+    minio_secure: bool = True
 
     postgres_db: str
     postgres_user: str

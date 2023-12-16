@@ -11,6 +11,7 @@ class MinioSettings(BaseAppSettings):
 
     access_key: str
     secret_key: str
+    secure: bool = True
 
     @property
     def dsn(self) -> str:

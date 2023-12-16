@@ -13,7 +13,7 @@ async def init_s3_client(settings: AppSettings) -> None:
         endpoint=settings.minio.dsn,
         access_key=settings.minio.access_key,
         secret_key=settings.minio.secret_key,
-        secure=not settings.service.debug,
+        secure=settings.minio.secure,
     )
 
 
