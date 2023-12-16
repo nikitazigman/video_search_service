@@ -15,7 +15,7 @@ from pydantic import ValidationError
 
 
 class TaskRepositoryProtocol(Protocol):
-    async def get_by_id(self, task_id: UUID) -> TaskSchema:
+    async def get_by_id(self, task_id: UUID) -> TaskSchema | None:
         ...
 
     async def get_all_info(self) -> Page[TaskSchema]:
@@ -32,11 +32,11 @@ class TaskRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_id(self, task_id: UUID) -> TaskSchema:
+    async def get_by_id(self, task_id: UUID) -> TaskSchema | None:
         try:
             select_stmt = select(Task).where(Task.id == task_id)
             task_model = await self.session.scalar(select_stmt)
-            return TaskSchema.model_validate(task_model)
+            return TaskSchema.model_validate(task_model) if task_model else None
         except (SQLAlchemyError, IOError) as e:
             raise DBServerException from e
 

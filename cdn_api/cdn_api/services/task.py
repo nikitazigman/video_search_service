@@ -4,6 +4,7 @@ from uuid import UUID
 from cdn_api.schemas.responses import TaskSchema
 from cdn_api.repositories.tasks import TaskRepositoryProtocol, get_task_repo
 from cdn_api.utils.dependencies import DBSessionType
+from fastapi import HTTPException
 
 
 class TaskServiceProtocol(Protocol):
@@ -18,7 +19,9 @@ class TaskService(TaskServiceProtocol):
         self.task_repository = task_repository
 
     async def get_by_id(self, task_id: UUID) -> TaskSchema:
-        return await self.task_repository.get_by_id(task_id)
+        if task := await self.task_repository.get_by_id(task_id):
+            return task
+        raise HTTPException(status_code=404, detail="Task not found")
 
 
 def get_task_service(
