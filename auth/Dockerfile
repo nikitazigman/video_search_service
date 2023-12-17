@@ -53,4 +53,4 @@ RUN poetry install --only main
 
 USER ${USER}:${GROUP}
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "-k", "uvicorn.workers.UvicornWorker", "src.main:app"]
+CMD ["poetry", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "-k", "uvicorn.workers.UvicornWorker", "src.main:app"]
