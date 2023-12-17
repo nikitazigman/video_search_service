@@ -49,7 +49,7 @@ app = FastAPI(
     title=settings.service.name,
     description=settings.service.description,
     docs_url="/docs",
-    openapi_url="/api/openapi.json",
+    openapi_url="/docs/openapi.json",
     default_response_class=ORJSONResponse,
     version="0.1.0",
 )

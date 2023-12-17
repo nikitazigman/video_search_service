@@ -39,5 +39,5 @@ OpenAPI 3 documentation:
 
 - OpenAPI json
     ```
-    GET /api/openapi.json
+    GET /docs/openapi.json
     ```
