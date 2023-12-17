@@ -67,3 +67,5 @@ Check the documentation [here](stream_api/README.md).
 6) replace minio keys in .env.prod files in cdn_api, stream_api, video_converter
 7) down the server ./scripts/prod.sh down
 8) restart the server ./scripts/prod.sh up
+9) connect to auth container - run migrations, create superuser. (instruction can be found in docs for auth service)
+10) Now everything is ready to consume api. Learn docs and have fun :)
