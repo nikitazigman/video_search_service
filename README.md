@@ -1,6 +1,6 @@
 # CDN service
 
-**[Link to the project to be reviewed](https://github.com/alena-kono/graduate_work)**
+**[Link to the original project](https://github.com/alena-kono/graduate_work)**
 
 ## Components
 ### Auth service
